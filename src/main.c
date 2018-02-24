@@ -3,8 +3,11 @@
 #include "allocator.h"
 #include <stdlib.h>
 
+#include "newseglist.h"
+
 int main(int argc, char const *argv[]) {
-    setup();
+    seg_init();
+/*    setup();
     void *x = ye_malloc(sizeof(double) * 8);
     // ye_varprint(x);
     // ye_snapshot();
@@ -13,5 +16,5 @@ int main(int argc, char const *argv[]) {
     // ye_snapshot();
     (void) y;
     teardown();
-    return 2;
+    return 2;*/
 }

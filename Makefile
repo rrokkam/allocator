@@ -1,6 +1,6 @@
 COMPILE := gcc -std=gnu11
-EXEC := allocator
-CFLAGS := -Wall -Werror -Wno-unused-variable -Wno-unused-but-set-variable
+EXEC := yemalloc
+CFLAGS := -Wall -Werror
 DFLAGS := -g -DDEBUG
 
 SRCD := src
@@ -12,6 +12,7 @@ SRCF := $(shell find $(SRCD) -type f -name *.c)
 OBJF := $(patsubst $(SRCD)/%,$(BLDD)/%,$(SRCF:.c=.o))
 
 .PHONY: clean all setup debug
+.DEFAULT: clean all
 
 all: setup $(EXEC)
 
@@ -24,8 +25,8 @@ clean:
 setup:
 	mkdir -p bin build
 
-$(EXEC): $(SRCF)
-	$(COMPILE) $(CFLAGS) -I$(INCD) $^ -o $(BIND)/$@
+$(EXEC): $(OBJF)
+	$(COMPILE) $(CFLAGS) -I$(INCD) $^ -o $(BIND)/$@ 
 
 $(BLDD)/%.o: $(SRCD)/%.c
 	$(COMPILE) $(CFLAGS) -I$(INCD) -c $< -o $@

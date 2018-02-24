@@ -44,19 +44,6 @@ void seg_remove(ye_header *blockhdr) {
 }
 
 /**
- * NOTE - returns FREE_LIST_COUNT - 1 if the size is too small!
- * Keep in mind LIST_4_MAX = -1.
- */
-int seg_listindex(size_t size) {
-    free_list list;
-    for(int i = 0; i < FREE_LIST_COUNT - 1; i++) {
-        list = seg_free_list[i];
-        if((list.min <= size) && (size <= list.max)) return i;
-    }
-    return FREE_LIST_COUNT - 1;
-}
-
-/**
  * Return NULL if there is no block of sufficient size.
  * Finds a block with BLOCKSIZE(block) >= size (in bytes).
  */
