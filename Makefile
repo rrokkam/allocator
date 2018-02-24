@@ -1,50 +1,31 @@
-CC := gcc
+COMPILE := gcc -std=gnu11
+EXEC := allocator
+CFLAGS := -Wall -Werror -Wno-unused-variable -Wno-unused-but-set-variable
+DFLAGS := -g -DDEBUG
+
 SRCD := src
-TSTD := tests
 BLDD := build
 BIND := bin
 INCD := include
 
 SRCF := $(shell find $(SRCD) -type f -name *.c)
-TSTF := $(shell find $(TSTD) -type f -name *.c)
+OBJF := $(patsubst $(SRCD)/%,$(BLDD)/%,$(SRCF:.c=.o))
 
-SRC_OBJF := $(patsubst $(SRCD)/%,$(BLDD)/%,$(SRCF:.c=.o))
-TST_OBJF := $(patsubst $(TSTD)/%,$(BLDD)/%,$(TSTF:.c=.o))
+.PHONY: clean all setup debug
 
-ALL_OBJF := $(SRC_OBJF) $(TST_OBJF)
-
-INC := -I$(INCD)
-
-CFLAGS := -Wall -Werror
-DFLAGS := -g -DDEBUG
-
-STD := -std=gnu11
-TEST_LIB := -lcriterion
-
-EXEC := sfmm
-EXEC_TEST := $(EXEC)_tests
-
-.PHONY: clean all setup format
-
-all: setup $(EXEC) $(EXEC_TEST)
+all: setup $(EXEC)
 
 debug: CFLAGS += $(DFLAGS)
 debug: all
 
+clean:
+	rm -rf $(BIND) $(BLDD)
+
 setup:
 	mkdir -p bin build
 
-$(EXEC): $(SRC_OBJF)
-	$(CC) $(CFLAGS) $(STD) $(INC) $^ -o $(BIND)/$@
-
-$(EXEC_TEST): $(filter-out build/main.o, $(ALL_OBJF))
-	$(CC) $(CFLAGS) $(STD) $(INC) $^ -o $(BIND)/$@ $(TEST_LIB)
+$(EXEC): $(SRCF)
+	$(COMPILE) $(CFLAGS) -I$(INCD) $^ -o $(BIND)/$@
 
 $(BLDD)/%.o: $(SRCD)/%.c
-	$(CC) $(CFLAGS) $(STD) $(INC) -c $< -o $@
-
-$(BLDD)/%.o: $(TSTD)/%.c
-	$(CC) $(CFLAGS) $(STD) $(INC) -c $< -o $@
-
-clean:
-	rm -rf $(BIND) $(BLDD)
+	$(COMPILE) $(CFLAGS) -I$(INCD) -c $< -o $@
