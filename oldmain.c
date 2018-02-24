@@ -5,12 +5,12 @@
 
 int main(int argc, char const *argv[]) {
     setup();
-    void *x = sf_malloc(sizeof(double) * 8);
-    // sf_varprint(x);
-    // sf_snapshot();
-    void *y = sf_realloc(x, sizeof(int));
-    // sf_varprint(y);
-    // sf_snapshot();
+    void *x = ye_malloc(sizeof(double) * 8);
+    // ye_varprint(x);
+    // ye_snapshot();
+    void *y = ye_realloc(x, sizeof(int));
+    // ye_varprint(y);
+    // ye_snapshot();
     (void) y;
     teardown();
     return 2;

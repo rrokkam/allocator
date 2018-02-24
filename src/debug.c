@@ -3,9 +3,9 @@
 /*
  * Function which outputs the state of the free-lists to stderr.
  * Performs checks on the placement of the header and footer
- * See sf_snapshot section for details on output format.
+ * See ye_snapshot section for details on output format.
  */
-void sf_snapshot() {
+void ye_snapshot() {
 
 }
 
@@ -17,21 +17,21 @@ void sf_snapshot() {
  *
  * @param block Address of the block header in memory.
  */
-void sf_blockprint(void* block) {
+void ye_blockprint(void *block) {
 //    fprintf(stderr,
 }
 
 /*
  * Prints human readable block format from the address of the payload.
  * IE. subtracts header size from the data pointer to obtain the address
- * of the block header. Calls sf_blockprint internally to print.
+ * of the block header. Calls ye_blockprint internally to print.
  *
  * Note: If there are 'bad' addresses in your free list
  * this function will most likely segfault.
  *
  * @param data Pointer to payload data in memory
- * (value returned by sf_malloc).
+ * (value returned by ye_malloc).
  */
-void sf_varprint(void *data) {
-
+void ye_varprint(void *data) {
+    ye_blockprint(data - 8); // TODO: Change this to the length of the header.
 }

@@ -5,17 +5,17 @@
 #include <string.h>
 #include <errno.h>
 
-int sf_errno = 0;
+int ye_errno = 0;
 
-void *sf_malloc(size_t size) {
+void *ye_malloc(size_t size) {
     if(!VALIDSIZE(size)) TERMINATE(EINVAL);
     size_t reqsize = required_size(size);
-    sf_header *blockhdr = seg_findspace(reqsize);
+    ye_header *blockhdr = seg_findspace(reqsize);
     if(blockhdr == NULL) TERMINATE(ENOMEM);
     seg_remove(blockhdr);
 
     if(can_split(blockhdr, reqsize)) {
-        sf_header *newhdr = split(blockhdr, reqsize); // prepares split block
+        ye_header *newhdr = split(blockhdr, reqsize); // prepares split block
         // no coalesce :( otherwise could have removed repeated code
         seg_insert(newhdr);
     }
@@ -25,25 +25,25 @@ void *sf_malloc(size_t size) {
     return ((void *) blockhdr) + SF_HEADER_SIZE_BYTES;
 }
 
-void *sf_realloc(void *ptr, size_t size) {
-    sf_header *blockhdr = ptr - SF_HEADER_SIZE_BYTES;
+void *ye_realloc(void *ptr, size_t size) {
+    ye_header *blockhdr = ptr - SF_HEADER_SIZE_BYTES;
     if(!valid_block(blockhdr)) abort();
     if(size == 0) {
-        sf_free(ptr);
+        ye_free(ptr);
         return NULL;
     } // size too big case is covered by valid_block and malloc returning null
 
     size_t reqsize = required_size(size);
     size_t blocksize = BLOCKSIZE(blockhdr);
     if(blocksize < reqsize) { // upsize
-        void *newptr = sf_malloc(size); // round up to 16, split done in sf_malloc
+        void *newptr = ye_malloc(size); // round up to 16, split done in ye_malloc
         if(newptr == NULL) return NULL;
         memcpy(newptr, ptr, size);
-        sf_free(ptr);
+        ye_free(ptr);
         return newptr;
     } else if(blocksize > reqsize) { // downsize
         if(can_split(blockhdr, reqsize)) { // repeated code with free..
-            sf_header *newhdr = split(blockhdr, reqsize);
+            ye_header *newhdr = split(blockhdr, reqsize);
             try_coalesce_up(newhdr);
             prepare(blockhdr, size, reqsize, 1);
         }
@@ -51,10 +51,10 @@ void *sf_realloc(void *ptr, size_t size) {
     return ptr;
 }
 
-void sf_free(void *ptr) {
-    sf_header *blockhdr = ptr - SF_HEADER_SIZE_BYTES;
+void ye_free(void *ptr) {
+    ye_header *blockhdr = ptr - SF_HEADER_SIZE_BYTES;
     if(!valid_block(blockhdr) || !ALLOCATED(blockhdr)) abort();
     try_coalesce_up(blockhdr);
     blockhdr->allocated = 0; // rather than prepare 0 everything..
-    ((sf_header *)FOOTER(blockhdr))->allocated = 0;
+    ((ye_header *)FOOTER(blockhdr))->allocated = 0;
 }

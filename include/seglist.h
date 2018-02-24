@@ -4,12 +4,10 @@
 #include "helpers.h"
 #include "allocator.h"
 
-void seg_insert(sf_header *blockhdr);
+void seg_insert(ye_header *blockhdr);
 
-void seg_remove(sf_header *blockhdr);
+void seg_remove(ye_header *blockhdr);
 
-int seg_listindex(size_t size);
-
-sf_header *seg_findspace(size_t size);
+ye_header *seg_findspace(size_t size);
 
 #endif /* SEGLIST_H */

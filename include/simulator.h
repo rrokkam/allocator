@@ -37,8 +37,8 @@ void *heap_max();
  *
  * @return On success, this function returns the previous program break.
  * If the break was increased, this value is a pointer to the start of the newly
- * allocated memory. On error, (void *) -1 is returned and sf_errno is set to ENOMEM.
+ * allocated memory. On error, (void *) -1 is returned and ye_errno is set to ENOMEM.
  */
-void *nsbrk();
+void *ye_sbrk();
 
 #endif

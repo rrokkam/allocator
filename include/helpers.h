@@ -12,12 +12,12 @@
 #define MIN_BLOCK_SIZE (SF_OVERHEAD + MIN_PAYLOAD_SIZE)
 #define MAX_BLOCK_SIZE (PAGE_SZ * NUM_PAGES)
 
-#define TERMINATE(no) {sf_errno = no; return NULL;}
+#define TERMINATE(no) {ye_errno = no; return NULL;}
 
-#define BLOCKSIZE(ptr) (((sf_header *)ptr)->block_size << 4)
+#define BLOCKSIZE(ptr) (((ye_header *)ptr)->block_size << 4)
 #define FOOTER(ptr) ((void *)ptr + BLOCKSIZE(ptr) - SF_FOOTER_SIZE_BYTES)
 #define HEADER(ptr) ((void *)ptr - BLOCKSIZE(ptr) + SF_FOOTER_SIZE_BYTES)
-#define ALLOCATED(ptr) (((sf_header *)ptr)->allocated)
+#define ALLOCATED(ptr) (((ye_header *)ptr)->allocated)
 #define VALIDSIZE(size) ((size != 0) && ((size_t)size <= NUM_PAGES * PAGE_SZ))
 #define PAYLOADSIZE(size) (size - SF_OVERHEAD)
 
@@ -41,6 +41,5 @@ void *addpage();
 void *nextblock(void *blockhdr);
 
 void *prevblock(void *blockhdr);
-
 
 #endif /* HELPERS_H */

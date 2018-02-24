@@ -16,8 +16,8 @@ bool valid_block(void *ptr) {
     if(ptr < heap_min()) return false;
     if(ptr + MIN_BLOCK_SIZE > heap_max()) return false; // duplicate check for ftr
 
-    sf_header *blockhdr = (sf_header *) ptr;
-    sf_header *blockftr = FOOTER(blockhdr);
+    ye_header *blockhdr = (ye_header *) ptr;
+    ye_header *blockftr = FOOTER(blockhdr);
     size_t hdrblocksize = BLOCKSIZE(blockhdr);
     size_t ftrblocksize = BLOCKSIZE(blockftr);
 
@@ -41,11 +41,11 @@ bool valid_block(void *ptr) {
  */
 void prepare(void *blockhdr, size_t requested_size,
     size_t block_size, bool allocated) {
-    sf_header *hdr = (sf_header *)blockhdr;
+    ye_header *hdr = (ye_header *)blockhdr;
     hdr->block_size = block_size >> 4;
     hdr->allocated = allocated;
 
-    sf_header *ftr = FOOTER(hdr);
+    ye_header *ftr = FOOTER(hdr);
     ftr->requested_size = requested_size;
     ftr->block_size = hdr->block_size;
     ftr->allocated = hdr->allocated;
@@ -60,7 +60,7 @@ void coalesce(void *firsthdr, void *secondhdr) {
 }
 
 void try_coalesce_up(void *blockhdr) {
-    sf_header *nexthdr = nextblock(blockhdr);
+    ye_header *nexthdr = nextblock(blockhdr);
     if(nexthdr != NULL && !ALLOCATED(nexthdr)) {
         seg_remove(nexthdr);
         coalesce(blockhdr, nexthdr);
@@ -91,14 +91,14 @@ bool can_split(void *blockhdr, size_t reqsize) {
  * Does NOT prepare the old block header.
  */
 void *split(void *blockhdr, size_t size) {
-    sf_header *newhdr = blockhdr + size;
+    ye_header *newhdr = blockhdr + size;
     prepare(newhdr, 0, BLOCKSIZE(blockhdr) - size, 0);
     prepare(blockhdr, 0, size, 0);
     return newhdr;
 }
 
 void *addpage() {
-    void *pghdr = nsbrk();
+    void *pghdr = ye_sbrk();
     if(pghdr == (void *) -1) return NULL;
     prepare(pghdr, 0, PAGE_SZ, 0);
     return pghdr;

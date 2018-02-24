@@ -26,18 +26,18 @@
 #define FREE_LIST_COUNT 4
 
 /* Struct for an allocated block header */
-typedef struct sf_header {
+typedef struct ye_header {
     uint64_t      allocated : ALLOCATED_BIT;
     uint64_t         unused : UNUSED;
     uint64_t     block_size : BLOCKSIZE_BITS;
     uint64_t requested_size : REQSIZE_BITS;
-    struct sf_header *next;
-    struct sf_header *prev;
-} __attribute__((packed)) sf_header;
+    struct ye_header *next;
+    struct ye_header *prev;
+} __attribute__((packed)) ye_header;
 
 /* Segregated free list struct */
 typedef struct {
-    sf_header *head;
+    ye_header *head;
     uint16_t min;
     uint16_t max;
 } free_list;
@@ -46,18 +46,18 @@ typedef struct {
 extern free_list seg_free_list[FREE_LIST_COUNT];
 
 /*
- * This is your implementation of sf_malloc. It acquires uninitialized memory that
+ * This is your implementation of ye_malloc. It acquires uninitialized memory that
  * is aligned and padded properly for the underlying system.
  *
  * @param size The number of bytes requested to be allocated.
  *
  * @return If successful, the pointer to a valid region of memory of the
- * requested size is returned, else NULL is returned and sf_errno as follows:
+ * requested size is returned, else NULL is returned and ye_errno as follows:
  *
- * If size is invalid (0 or greater than 4 pages), sf_errno is set to EINVAL
- * If the request cannot be satisfied, sf_errno is set to ENOMEM
+ * If size is invalid (0 or greater than 4 pages), ye_errno is set to EINVAL
+ * If the request cannot be satisfied, ye_errno is set to ENOMEM
  */
-void *sf_malloc(size_t size);
+void *ye_malloc(size_t size);
 
 /*
  * Resizes the memory pointed to by ptr to size bytes.
@@ -66,24 +66,24 @@ void *sf_malloc(size_t size);
  * @param size The minimum size to resize the memory to.
  *
  * @return If successful, the pointer to a valid region of memory is
- * returned, else NULL is returned and sf_errno is set appropriately.
+ * returned, else NULL is returned and ye_errno is set appropriately.
  *
- * If there is no memory available sf_realloc should set sf_errno to ENOMEM.
- * If sf_realloc is called with an invalid pointer sf_errno should be set to EINVAL.
+ * If there is no memory available ye_realloc should set ye_errno to ENOMEM.
+ * If ye_realloc is called with an invalid pointer ye_errno should be set to EINVAL.
  *
- * If sf_realloc is called with a valid pointer and a size of 0 it should free
+ * If ye_realloc is called with a valid pointer and a size of 0 it should free
  * the allocated block and return NULL.
  */
-void *sf_realloc(void *ptr, size_t size);
+void *ye_realloc(void *ptr, size_t size);
 
 /*
  * Marks a dynamically allocated region as no longer in use.
  * Adds the newly freed block to the free list.
  *
- * @param ptr Address of memory returned by the function sf_malloc.
+ * @param ptr Address of memory returned by the function ye_malloc.
  *
  * If ptr is invalid, the function calls abort() to exit the program.
  */
-void sf_free(void *ptr);
+void ye_free(void *ptr);
 
 #endif

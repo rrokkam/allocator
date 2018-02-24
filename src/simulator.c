@@ -26,7 +26,7 @@ void *heap_max() {
     return max_brk;
 }
 
-void *nsbrk(ssize_t increment) {
+void *ye_sbrk(ssize_t increment) {
     void *new_brk = cur_brk + increment;
     if(new_brk <= max_brk) {
         cur_brk = new_brk;
