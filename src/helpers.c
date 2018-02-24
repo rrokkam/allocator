@@ -13,16 +13,16 @@
 bool valid_block(void *ptr) {
     if(ptr == NULL) return false;
 
-    if(ptr < get_heap_start()) return false;
-    if(ptr + MIN_BLOCK_SIZE > get_heap_end()) return false; // duplicate check for ftr
+    if(ptr < heap_min()) return false;
+    if(ptr + MIN_BLOCK_SIZE > heap_max()) return false; // duplicate check for ftr
 
     sf_header *blockhdr = (sf_header *) ptr;
     sf_header *blockftr = FOOTER(blockhdr);
     size_t hdrblocksize = BLOCKSIZE(blockhdr);
     size_t ftrblocksize = BLOCKSIZE(blockftr);
 
-    if((void *) blockftr - MIN_BLOCK_SIZE + SF_HEADER_SIZE_BYTES < get_heap_start()) return false;
-    if((void *) blockftr + SF_FOOTER_SIZE_BYTES > get_heap_end()) return false;
+    if((void *) blockftr - MIN_BLOCK_SIZE + SF_HEADER_SIZE_BYTES < heap_min()) return false;
+    if((void *) blockftr + SF_FOOTER_SIZE_BYTES > heap_max()) return false;
 
     if(hdrblocksize != ftrblocksize) return false;
     if(blockhdr->allocated != blockftr->allocated) return false;
@@ -98,7 +98,7 @@ void *split(void *blockhdr, size_t size) {
 }
 
 void *addpage() {
-    void *pghdr = my_sbrk();
+    void *pghdr = nsbrk();
     if(pghdr == (void *) -1) return NULL;
     prepare(pghdr, 0, PAGE_SZ, 0);
     return pghdr;
@@ -106,16 +106,16 @@ void *addpage() {
 
 void *nextblock(void *blockhdr) {
     void *nexthdr = blockhdr + BLOCKSIZE(blockhdr);
-    if(nexthdr + SF_HEADER_SIZE_BYTES > get_heap_end()
+    if(nexthdr + SF_HEADER_SIZE_BYTES > heap_max()
         || !valid_block(nexthdr)) return NULL;
     return nexthdr;
 }
 
 void *prevblock(void *blockhdr) {
     void *prevftr = blockhdr - SF_FOOTER_SIZE_BYTES;
-    if(prevftr < get_heap_start() ||
+    if(prevftr < heap_min() ||
         BLOCKSIZE(prevftr) < MIN_BLOCK_SIZE) return NULL;
     void *prevhdr = HEADER(prevftr);
-    if(prevhdr < get_heap_start() || !valid_block(prevhdr)) return NULL;
+    if(prevhdr < heap_min() || !valid_block(prevhdr)) return NULL;
     return prevhdr;
 }
