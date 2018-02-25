@@ -9,18 +9,26 @@
 
 
 void ye_snapshot() {
-
+    ye_header *head;
+    for (int index = 0; index < NUM_LISTS; index++) {
+        head = seglist[index].head;
+        if (head != NULL) {
+            info("FREE LIST %d:", index);
+            for (ye_header *block = head; block != NULL; block = block->next) {
+                ye_blockprint(block);
+            }
+        }
+    }
 }
 
 void ye_blockprint(ye_header *block) {
-//    fprintf(stderr,
+    info("Block at %p: \nsize: %u \nallocated: %s \nnext: \n%p prev: %p",
+         block, block->block_size, block->allocated, block->next, block->prev);
 }
 
 void ye_varprint(void *data) {
     ye_blockprint(data - YE_HEADER_SIZE);
 }
-
-
 
 
 /*
@@ -116,7 +124,7 @@ void *split(void *blockhdr, size_t size) {
 void *addpage() {
     void *pghdr = ye_sbrk();
     if(pghdr == (void *) -1) return NULL;
-    prepare(pghdr, 0, /*PAGE_SZ*/ 999, 0); // TODO: move this into segfreelist.
+    prepare(pghdr, 0, /*PAGE_SZ*/ 999, 0); // TODO: move this into seglist.
     return pghdr;
 }
 

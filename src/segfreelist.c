@@ -3,7 +3,7 @@
 #include "allocator.h"
 #include "utils.h"
 
-freelist segfreelist[NUM_LISTS];
+freelist seglist[NUM_LISTS];
 
 /* 
  * Initialize segmented free list with mins and maxes
@@ -15,23 +15,23 @@ freelist segfreelist[NUM_LISTS];
  */
 void seg_init() {
     for (int i = 0; i < NUM_SMALL_LISTS; i++) {
-        segfreelist[i] = (freelist) {NULL, (i << 3) + 16, (i << 3) + 16};
+        seglist[i] = (freelist) {NULL, (i << 3) + 16, (i << 3) + 16};
     }
     for (int i = NUM_SMALL_LISTS; i < NUM_LISTS; i++) {
-        segfreelist[i] = (freelist) {NULL, 1 << i, (1 << (i + 1)) - 8};
+        seglist[i] = (freelist) {NULL, 1 << i, (1 << (i + 1)) - 8};
     }
-    segfreelist[NUM_LISTS - 1].max = -1;
+    seglist[NUM_LISTS - 1].max = -1;
 }
 
 /* Don't give this a size lower than the minimum!! */
 int seg_index(size_t size) {
-    if (size < segfreelist[NUM_SMALL_LISTS].min) {
+    if (size < seglist[NUM_SMALL_LISTS].min) {
         if (size & 0x07) { // divisible by 8
             return (size >> 3) - 1;
         } else {
             return (size >> 3) - 2;
         }
-    } else if (size > segfreelist[NUM_LISTS - 1].min) {
+    } else if (size > seglist[NUM_LISTS - 1].min) {
         return NUM_LISTS - 1;
     } else { // compute first bit set. This is fls(size) on BSD.
         int index;
@@ -43,13 +43,13 @@ int seg_index(size_t size) {
 }
 
 ye_header *seg_head(ye_header *blockhdr) {
-    return segfreelist[seg_index(BLOCKSIZE(blockhdr))].head;
+    return seglist[seg_index(BLOCKSIZE(blockhdr))].head;
 }
 
 void seg_add(ye_header *blockhdr) {
     int index = seg_index(BLOCKSIZE(blockhdr));
-    ye_header *old_head = segfreelist[index].head;
-    segfreelist[index].head = blockhdr;
+    ye_header *old_head = seglist[index].head;
+    seglist[index].head = blockhdr;
     blockhdr->next = old_head;
     blockhdr->prev = NULL;
     if (old_head != NULL) {
@@ -64,7 +64,7 @@ void seg_rm(ye_header *blockhdr) {
     if (prevhdr != NULL) {
         prevhdr->next = nexthdr;
     } else {
-        segfreelist[index].head = nexthdr;
+        seglist[index].head = nexthdr;
     }
     if (nexthdr != NULL) {
         nexthdr->prev = prevhdr;
@@ -75,7 +75,7 @@ void seg_rm(ye_header *blockhdr) {
 ye_header *seg_find(size_t size) {
     ye_header *blockhdr, *pghdr, *newhdr;
     for(int i = seg_index(size); i < NUM_LISTS; i++) {
-        blockhdr = segfreelist[i].head;
+        blockhdr = seglist[i].head;
         while(blockhdr != NULL) {
             if(BLOCKSIZE(blockhdr) >= size) return blockhdr;
             blockhdr = blockhdr->next;
