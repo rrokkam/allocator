@@ -13,14 +13,6 @@
 #define SF_HEADER_SIZE (REQSIZE_BITS + BLOCKSIZE_BITS + UNUSED + ALLOCATED_BIT)
 #define SF_FOOTER_SIZE SF_HEADER_SIZE
 
-#define LIST_1_MIN 32
-#define LIST_1_MAX 128
-#define LIST_2_MIN 129
-#define LIST_2_MAX 512
-#define LIST_3_MIN 513
-#define LIST_3_MAX 2048
-#define LIST_4_MIN 2049
-#define LIST_4_MAX -1
 #define PAGE_SZ 4096
 
 #define FREE_LIST_COUNT 4
@@ -34,17 +26,7 @@ typedef struct ye_header {
     struct ye_header *next;
     struct ye_header *prev;
 } __attribute__((packed)) ye_header;
-
-/* Segregated free list struct */
-typedef struct {
-    ye_header *head;
-    uint16_t min;
-    uint16_t max;
-} free_list;
-
-/* This is the segregated free list */
-extern free_list seg_free_list[FREE_LIST_COUNT];
-
+    
 /*
  * This is your implementation of ye_malloc. It acquires uninitialized memory that
  * is aligned and padded properly for the underlying system.

@@ -2,9 +2,6 @@
 #include "seglist.h"
 #include "allocator.h"
 
-#define NUM_SMALL_LISTS 6 // lists with blocks of only one size
-#define NUM_LISTS 11 // includes small lists
-
 freelist seglist[NUM_LISTS];
 
 /* 
@@ -73,7 +70,7 @@ void seg_rm(ye_header *blockhdr) {
     }
 }
 
-// TODO: seg_find with calling ye_sbrk
+// TODO: seg_find with calling ye_sbrk properly.
 ye_header *seg_find(size_t size) {
     ye_header *blockhdr, *pghdr, *newhdr;
     for(int i = seg_index(size); i < NUM_LISTS; i++) {

@@ -13,6 +13,7 @@
  * - Rewrite debug functions to print out state of lists
  * - Clean up some spots with messy formatting / too much macro usage.
  * - Coalescing properly, in both directions
+ * - Document the new stuff
  *
  * Extra stuff, if I have time
  * - Redo the headers -- this is big!
