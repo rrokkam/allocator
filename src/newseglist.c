@@ -13,7 +13,7 @@ freelist seglist[NUM_LISTS];
  * after 6: logarithmically spaced. 64, 128, 256, 512, ...
  *
  * TODO: Might be worth trying to do this with a macro.. this seems like it
- * could/should be done at compile-time.
+ * could/should be done at compile time.
  */
 void seg_init() {
     for (int i = 0; i < NUM_SMALL_LISTS; i++) {
@@ -73,4 +73,33 @@ void seg_rm(ye_header *blockhdr) {
     }
 }
 
-// seg_finds
+// TODO: seg_find with calling ye_sbrk
+ye_header *seg_find(size_t size) {
+    ye_header *blockhdr, *pghdr, *newhdr;
+    for(int i = seg_index(size); i < NUM_LISTS; i++) {
+        blockhdr = seg_free_list[i].head;
+        while(blockhdr != NULL) {
+            if(BLOCKSIZE(blockhdr) >= size) return blockhdr;
+            blockhdr = blockhdr->next;
+        }
+    }
+
+    do { // Didn't find a block of sufficient size, time to sbrk.
+        if((pghdr = addpage()) == NULL) return NULL;
+        /* newhdr = seg_insert(pghdr); */
+
+
+        blockhdr = prevblock(pghdr); // try_coalesce_down
+        if(blockhdr != NULL && !ALLOCATED(blockhdr)) { // handles before getheapstart
+            seg_remove(blockhdr); // extra inserts and removes are a little silly
+                                    // but are needed for coalesce to work properly.
+            coalesce(blockhdr, pghdr);
+            seg_insert(blockhdr);
+            newhdr = blockhdr;
+        } else {
+            seg_insert(pghdr);
+            newhdr = pghdr;
+        }
+    } while (BLOCKSIZE(newhdr) < size); // don't need to check the rest, this is biggest
+    return newhdr;
+}
