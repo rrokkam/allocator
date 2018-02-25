@@ -4,7 +4,7 @@
 #include "allocator.h"
 #include <stdlib.h>
 
-#include "seglist.h"
+#include "segfreelist.h"
 
 /*
  * TODO:

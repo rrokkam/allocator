@@ -1,7 +1,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include "simulator.h"
-#include "seglist.h"
+#include "segfreelist.h"
 
 /* The starting, current, and max brk pointer values */
 void *min_brk;

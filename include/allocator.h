@@ -8,28 +8,23 @@
 #define BLOCKSIZE_BITS 28
 #define UNUSED 3
 #define ALLOCATED_BIT 1
-#define REQSIZE_BITS 32
 
-#define SF_HEADER_SIZE (REQSIZE_BITS + BLOCKSIZE_BITS + UNUSED + ALLOCATED_BIT)
-#define SF_FOOTER_SIZE SF_HEADER_SIZE
+#define YE_HEADER_SIZE (2 * (BLOCKSIZE_BITS + UNUSED + ALLOCATED_BIT))  // 64
 
-#define PAGE_SZ 4096
-
-#define FREE_LIST_COUNT 4
-
-/* Struct for an allocated block header */
+// TODO: change names to next and prev
 typedef struct ye_header {
     uint64_t      allocated : ALLOCATED_BIT;
     uint64_t         unused : UNUSED;
     uint64_t     block_size : BLOCKSIZE_BITS;
-    uint64_t requested_size : REQSIZE_BITS;
+    uint64_t     prev_alloc : ALLOCATED_BIT;
+    uint64_t    prev_unused : UNUSED;
+    uint64_t requested_size : BLOCKSIZE_BITS;
     struct ye_header *next;
     struct ye_header *prev;
 } __attribute__((packed)) ye_header;
     
 /*
- * This is your implementation of ye_malloc. It acquires uninitialized memory that
- * is aligned and padded properly for the underlying system.
+ * Acquires uninitialized memory that is aligned properly.
  *
  * @param size The number of bytes requested to be allocated.
  *
@@ -68,4 +63,9 @@ void *ye_realloc(void *ptr, size_t size);
  */
 void ye_free(void *ptr);
 
-#endif
+/*
+ * TODO: Documentation of realloc
+ */
+void *ye_realloc(void *ptr, size_t size);
+
+#endif /* ALLOCATOR_H */

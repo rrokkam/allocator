@@ -1,13 +1,13 @@
 #include "debug.h"
 #include "allocator.h"
 #include "simulator.h"
-#include "seglist.h"
+#include "segfreelist.h"
 #include "helpers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 
-/**
+/*
  * Checks if the block is a valid block.
  */
 bool valid_block(void *ptr) {
@@ -21,8 +21,8 @@ bool valid_block(void *ptr) {
     size_t hdrblocksize = BLOCKSIZE(blockhdr);
     size_t ftrblocksize = BLOCKSIZE(blockftr);
 
-    if((void *) blockftr - MIN_BLOCK_SIZE + SF_HEADER_SIZE_BYTES < heap_min()) return false;
-    if((void *) blockftr + SF_FOOTER_SIZE_BYTES > heap_max()) return false;
+    if((void *) blockftr - MIN_BLOCK_SIZE + YE_HEADER_SIZE_BYTES < heap_min()) return false;
+    if((void *) blockftr + YE_HEADER_SIZE_BYTES > heap_max()) return false;
 
     if(hdrblocksize != ftrblocksize) return false;
     if(blockhdr->allocated != blockftr->allocated) return false;
@@ -36,7 +36,7 @@ bool valid_block(void *ptr) {
     return true;
 }
 
-/**
+/*
  * Initialize a block header and footer with the provided bit fields.
  */
 void prepare(void *blockhdr, size_t requested_size,
@@ -73,8 +73,8 @@ void try_coalesce_up(void *blockhdr) {
  * Assumes the provided number size is a valid size; no error checking.
  */
 size_t required_size(size_t size) {
-    if(size % 16 == 0) return size + SF_OVERHEAD;
-    return (((size >> 4) + 1) << 4) + SF_OVERHEAD; // round up
+    if(size % 16 == 0) return size + YE_OVERHEAD;
+    return (((size >> 4) + 1) << 4) + YE_OVERHEAD; // round up
 }
 
 /**
@@ -100,19 +100,19 @@ void *split(void *blockhdr, size_t size) {
 void *addpage() {
     void *pghdr = ye_sbrk();
     if(pghdr == (void *) -1) return NULL;
-    prepare(pghdr, 0, PAGE_SZ, 0);
+    prepare(pghdr, 0, /*PAGE_SZ*/ 999, 0); // TODO: move this into segfreelist.
     return pghdr;
 }
 
 void *nextblock(void *blockhdr) {
     void *nexthdr = blockhdr + BLOCKSIZE(blockhdr);
-    if(nexthdr + SF_HEADER_SIZE_BYTES > heap_max()
+    if(nexthdr + YE_HEADER_SIZE_BYTES > heap_max()
         || !valid_block(nexthdr)) return NULL;
     return nexthdr;
 }
 
 void *prevblock(void *blockhdr) {
-    void *prevftr = blockhdr - SF_FOOTER_SIZE_BYTES;
+    void *prevftr = blockhdr - YE_HEADER_SIZE_BYTES;
     if(prevftr < heap_min() ||
         BLOCKSIZE(prevftr) < MIN_BLOCK_SIZE) return NULL;
     void *prevhdr = HEADER(prevftr);

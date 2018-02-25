@@ -1,4 +1,5 @@
 #include "debug.h"
+#include "allocator.h"
 
 /*
  * Function which outputs the state of the free-lists to stderr.
@@ -33,5 +34,5 @@ void ye_blockprint(void *block) {
  * (value returned by ye_malloc).
  */
 void ye_varprint(void *data) {
-    ye_blockprint(data - 8); // TODO: Change this to the length of the header.
+    ye_blockprint(data - (YE_HEADER_SIZE >> 3));
 }
