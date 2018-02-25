@@ -7,6 +7,22 @@
 #include <stdlib.h>
 #include <errno.h>
 
+
+void ye_snapshot() {
+
+}
+
+void ye_blockprint(ye_header *block) {
+//    fprintf(stderr,
+}
+
+void ye_varprint(void *data) {
+    ye_blockprint(data - YE_HEADER_SIZE);
+}
+
+
+
+
 /*
  * Checks if the block is a valid block.
  */
