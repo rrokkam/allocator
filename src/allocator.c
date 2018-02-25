@@ -8,14 +8,14 @@
 void *ye_malloc(size_t size) {
     if(!VALIDSIZE(size)) TERMINATE(EINVAL);
     size_t reqsize = required_size(size);
-    ye_header *blockhdr = seg_findspace(reqsize);
+    ye_header *blockhdr = seg_find(reqsize);
     if(blockhdr == NULL) TERMINATE(ENOMEM);
-    seg_remove(blockhdr);
+    seg_rm(blockhdr);
 
     if(can_split(blockhdr, reqsize)) {
         ye_header *newhdr = split(blockhdr, reqsize); // prepares split block
         // no coalesce :( otherwise could have removed repeated code
-        seg_insert(newhdr);
+        seg_add(newhdr);
     }
     size_t blocksize = BLOCKSIZE(blockhdr); // size depends on previous branch.
     prepare(blockhdr, size, blocksize, 1);

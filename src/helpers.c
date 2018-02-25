@@ -62,10 +62,10 @@ void coalesce(void *firsthdr, void *secondhdr) {
 void try_coalesce_up(void *blockhdr) {
     ye_header *nexthdr = nextblock(blockhdr);
     if(nexthdr != NULL && !ALLOCATED(nexthdr)) {
-        seg_remove(nexthdr);
+        seg_rm(nexthdr);
         coalesce(blockhdr, nexthdr);
     }
-    seg_insert(blockhdr);
+    seg_add(blockhdr);
 }
 
 /**

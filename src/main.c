@@ -4,7 +4,7 @@
 #include "allocator.h"
 #include <stdlib.h>
 
-#include "newseglist.h"
+#include "seglist.h"
 
 /*
  * TODO:
