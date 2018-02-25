@@ -4,9 +4,6 @@
 #include "helpers.h"
 #include "allocator.h"
 
-#define NUM_SMALL_LISTS 7 // lists with blocks of only one size
-#define NUM_LISTS 11 // includes small lists
-
 /* Struct to store a free list */
 typedef struct {
     ye_header *head;
@@ -14,12 +11,8 @@ typedef struct {
     uint16_t max;
 } freelist;
 
-/* */
-extern freelist seglist[NUM_LISTS];
-
 void seg_init();
-void nseg_insert(ye_header *blockhdr);
-void nseg_remove(ye_header *blockhdr);
-ye_header *nseg_findspace(size_t size);
+void seg_add(ye_header *blockhdr);
+void seg_rm(ye_header *blockhdr);
 
 #endif /* NEWSEGLIST_H */

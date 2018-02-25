@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include "simulator.h"
+#include "newseglist.h"
 
 /* The starting, current, and max brk pointer values */
 void *min_brk;
@@ -11,6 +12,7 @@ void setup() {
     min_brk = malloc(NM_PAGES * PAGE_SIZE);
     cur_brk = min_brk + PAGE_SIZE;
     max_brk = min_brk + NM_PAGES * PAGE_SIZE;
+    seg_init();
 }
 
 void teardown() {
