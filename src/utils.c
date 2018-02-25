@@ -21,8 +21,8 @@ bool valid_block(void *ptr) {
     size_t hdrblocksize = BLOCKSIZE(blockhdr);
     size_t ftrblocksize = BLOCKSIZE(blockftr);
 
-    if((void *) blockftr - MIN_BLOCK_SIZE + YE_HEADER_SIZE_BYTES < heap_min()) return false;
-    if((void *) blockftr + YE_HEADER_SIZE_BYTES > heap_max()) return false;
+    if((void *) blockftr - MIN_BLOCK_SIZE + YE_HEADER_SIZE < heap_min()) return false;
+    if((void *) blockftr + YE_HEADER_SIZE > heap_max()) return false;
 
     if(hdrblocksize != ftrblocksize) return false;
     if(blockhdr->allocated != blockftr->allocated) return false;
@@ -106,13 +106,13 @@ void *addpage() {
 
 void *nextblock(void *blockhdr) {
     void *nexthdr = blockhdr + BLOCKSIZE(blockhdr);
-    if(nexthdr + YE_HEADER_SIZE_BYTES > heap_max()
+    if(nexthdr + YE_HEADER_SIZE > heap_max()
         || !valid_block(nexthdr)) return NULL;
     return nexthdr;
 }
 
 void *prevblock(void *blockhdr) {
-    void *prevftr = blockhdr - YE_HEADER_SIZE_BYTES;
+    void *prevftr = blockhdr - YE_HEADER_SIZE;
     if(prevftr < heap_min() ||
         BLOCKSIZE(prevftr) < MIN_BLOCK_SIZE) return NULL;
     void *prevhdr = HEADER(prevftr);

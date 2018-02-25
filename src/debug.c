@@ -1,5 +1,5 @@
 #include "debug.h"
-#include "allocator.h"
+#include "segfreelist.h"
 
 /*
  * Function which outputs the state of the free-lists to stderr.
@@ -18,7 +18,7 @@ void ye_snapshot() {
  *
  * @param block Address of the block header in memory.
  */
-void ye_blockprint(void *block) {
+void ye_blockprint(ye_header *block) {
 //    fprintf(stderr,
 }
 
@@ -34,5 +34,5 @@ void ye_blockprint(void *block) {
  * (value returned by ye_malloc).
  */
 void ye_varprint(void *data) {
-    ye_blockprint(data - (YE_HEADER_SIZE >> 3));
+    ye_blockprint(data - YE_HEADER_SIZE);
 }

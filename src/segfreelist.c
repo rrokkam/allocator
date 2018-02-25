@@ -1,6 +1,7 @@
-#include "debug.h"
 #include "segfreelist.h"
+#include "debug.h"
 #include "allocator.h"
+#include "helpers.h"
 
 freelist segfreelist[NUM_LISTS];
 

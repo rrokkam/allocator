@@ -2,6 +2,7 @@
 #include "helpers.h"
 #include "allocator.h"
 #include "segfreelist.h"
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 
@@ -20,11 +21,11 @@ void *ye_malloc(size_t size) {
     size_t blocksize = BLOCKSIZE(blockhdr); // size depends on previous branch.
     prepare(blockhdr, size, blocksize, 1);
 
-    return ((void *) blockhdr) + YE_HEADER_SIZE_BYTES;
+    return ((void *) blockhdr) + YE_HEADER_SIZE;
 }
 
 void *ye_realloc(void *ptr, size_t size) {
-    ye_header *blockhdr = ptr - YE_HEADER_SIZE_BYTES;
+    ye_header *blockhdr = ptr - YE_HEADER_SIZE;
     if(!valid_block(blockhdr)) abort();
     if(size == 0) {
         ye_free(ptr);
@@ -50,7 +51,7 @@ void *ye_realloc(void *ptr, size_t size) {
 }
 
 void ye_free(void *ptr) {
-    ye_header *blockhdr = ptr - YE_HEADER_SIZE_BYTES;
+    ye_header *blockhdr = ptr - YE_HEADER_SIZE;
     if(!valid_block(blockhdr) || !ALLOCATED(blockhdr)) abort();
     try_coalesce_up(blockhdr);
     blockhdr->allocated = 0; // rather than prepare 0 everything..

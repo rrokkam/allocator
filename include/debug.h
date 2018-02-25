@@ -2,6 +2,7 @@
 #define DEBUG_H
 
 #include <stdio.h>
+#include "segfreelist.h"
 
 #define NRM "\033[0m"
 #define RED "\033[1;31m"
@@ -41,7 +42,7 @@ void ye_snapshot();
  *
  * @param block Address of the block header in memory.
  */
-void ye_blockprint(void* block);
+void ye_blockprint(ye_header *block);
 
 /*
  * Prints human readable block format from the address of the payload.
