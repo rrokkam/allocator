@@ -12,7 +12,7 @@
 #define MIN_BLOCK_SIZE (SF_OVERHEAD + MIN_PAYLOAD_SIZE)
 #define MAX_BLOCK_SIZE (PAGE_SZ * NUM_PAGES)
 
-#define TERMINATE(no) {ye_errno = no; return NULL;}
+#define TERMINATE(no) {errno = no; return NULL;}
 
 #define BLOCKSIZE(ptr) (((ye_header *)ptr)->block_size << 4)
 #define FOOTER(ptr) ((void *)ptr + BLOCKSIZE(ptr) - SF_FOOTER_SIZE_BYTES)

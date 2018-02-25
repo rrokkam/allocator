@@ -91,13 +91,13 @@ ye_header *seg_find(size_t size) {
 
         blockhdr = prevblock(pghdr); // try_coalesce_down
         if(blockhdr != NULL && !ALLOCATED(blockhdr)) { // handles before getheapstart
-            seg_remove(blockhdr); // extra inserts and removes are a little silly
+            seg_rm(blockhdr); // extra inserts and removes are a little silly
                                     // but are needed for coalesce to work properly.
             coalesce(blockhdr, pghdr);
-            seg_insert(blockhdr);
+            seg_add(blockhdr);
             newhdr = blockhdr;
         } else {
-            seg_insert(pghdr);
+            seg_add(pghdr);
             newhdr = pghdr;
         }
     } while (BLOCKSIZE(newhdr) < size); // don't need to check the rest, this is biggest

@@ -52,10 +52,10 @@ extern free_list seg_free_list[FREE_LIST_COUNT];
  * @param size The number of bytes requested to be allocated.
  *
  * @return If successful, the pointer to a valid region of memory of the
- * requested size is returned, else NULL is returned and ye_errno as follows:
+ * requested size is returned, else NULL is returned and errno as follows:
  *
- * If size is invalid (0 or greater than 4 pages), ye_errno is set to EINVAL
- * If the request cannot be satisfied, ye_errno is set to ENOMEM
+ * If size is invalid (0 or greater than 4 pages), errno is set to EINVAL
+ * If the request cannot be satisfied, errno is set to ENOMEM
  */
 void *ye_malloc(size_t size);
 
@@ -66,10 +66,10 @@ void *ye_malloc(size_t size);
  * @param size The minimum size to resize the memory to.
  *
  * @return If successful, the pointer to a valid region of memory is
- * returned, else NULL is returned and ye_errno is set appropriately.
+ * returned, else NULL is returned and errno is set appropriately.
  *
- * If there is no memory available ye_realloc should set ye_errno to ENOMEM.
- * If ye_realloc is called with an invalid pointer ye_errno should be set to EINVAL.
+ * If there is no memory available ye_realloc should set errno to ENOMEM.
+ * If ye_realloc is called with an invalid pointer errno should be set to EINVAL.
  *
  * If ye_realloc is called with a valid pointer and a size of 0 it should free
  * the allocated block and return NULL.

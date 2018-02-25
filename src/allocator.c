@@ -5,8 +5,6 @@
 #include <string.h>
 #include <errno.h>
 
-int ye_errno = 0;
-
 void *ye_malloc(size_t size) {
     if(!VALIDSIZE(size)) TERMINATE(EINVAL);
     size_t reqsize = required_size(size);
@@ -57,4 +55,13 @@ void ye_free(void *ptr) {
     try_coalesce_up(blockhdr);
     blockhdr->allocated = 0; // rather than prepare 0 everything..
     ((ye_header *)FOOTER(blockhdr))->allocated = 0;
+}
+
+void *ye_calloc(size_t nmemb, size_t size) {
+    size_t len = nmemb * size;
+    void *ret = ye_malloc(len);
+    if (ret == NULL) {
+        return NULL;
+    }
+    return memset(ret, 0, len); // memset segfaults on ret = NULL
 }

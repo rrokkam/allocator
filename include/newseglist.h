@@ -14,6 +14,6 @@ typedef struct {
 void seg_init();
 void seg_add(ye_header *blockhdr);
 void seg_rm(ye_header *blockhdr);
-void seg_find(size_t size);
+ye_header *seg_find(size_t size);
 
 #endif /* NEWSEGLIST_H */
