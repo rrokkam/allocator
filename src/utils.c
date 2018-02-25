@@ -2,7 +2,7 @@
 #include "allocator.h"
 #include "simulator.h"
 #include "segfreelist.h"
-#include "helpers.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
