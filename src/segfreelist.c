@@ -25,19 +25,15 @@ void seg_init() {
 }
 
 /* Don't give this a size lower than the minimum!! */
-int seg_index(size_t size) {
-    if (size < seglist[NUM_SMALL_LISTS].min) {
-        if (size & 0x07) { // divisible by 8
-            return (size >> 3) - 1;
-        } else {
-            return (size >> 3) - 2;
-        }
-    } else if (size > seglist[NUM_LISTS - 1].min) {
+int seg_index(size_t rsize) {
+    if (rsize < seglist[NUM_SMALL_LISTS].min) {
+        return (rsize >> 3) - 2;
+    } else if (rsize > seglist[NUM_LISTS - 1].min) {
         return NUM_LISTS - 1;
     } else { // compute first bit set. This is fls(size) on BSD.
         int index;
-        for (index = 0; size != 1; index++) {
-            size >>= 1;
+        for (index = 0; rsize != 1; index++) {
+            rsize >>= 1;
         }
         return index;
     }

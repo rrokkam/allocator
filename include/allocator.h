@@ -42,8 +42,8 @@ void *ye_realloc(void *ptr, size_t size);
 void ye_free(void *ptr);
 
 /*
- * TODO: Documentation of realloc
+ * TODO: Documentation of calloc
  */
-void *ye_realloc(void *ptr, size_t size);
+void *ye_calloc(size_t nmemb, size_t size);
 
 #endif /* ALLOCATOR_H */

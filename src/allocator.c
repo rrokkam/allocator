@@ -6,20 +6,24 @@
 #include <string.h>
 #include <errno.h>
 
+#define SPLITTABLE(hdr, size) ((BLKSIZE(hdr) - (size_t) size) >= MIN_BLOCK_SIZE)
+#define ROUND(size) ((((size_t) size & ~0x07) + 8 * (((size_t) size & 0x07) != 0)))
+
 void *ye_malloc(size_t size) {
-    ye_header *blockhdr = seg_find(size);
-    if (blockhdr == NULL) {
+    size_t rsize = ROUND(size);
+    ye_header *hdr = seg_find(rsize);
+    if (hdr == NULL) {
         return NULL;
     }
 
-    if(can_split(blockhdr, size)) {
-        ye_header *newhdr = split(blockhdr, size); // prepares the split off block
+    if(SPLITTABLE(hdr, rsize)) {
+        ye_header *newhdr = split(hdr, rsize); // prepares the split off block
         // TODO: coalesce newhdr with next if possible
         seg_add(newhdr);
     }
-    prepare(blockhdr, size, 1);
+    prepare(hdr, rsize, 1);
 
-    return ((void *) blockhdr) + YE_HEADER_SIZE;
+    return ((void *) hdr) + YE_HEADER_SIZE;
 }
 
 void *ye_realloc(void *ptr, size_t size) {
@@ -29,9 +33,9 @@ void *ye_realloc(void *ptr, size_t size) {
         return NULL;
     } // size too big case is covered by valid_block and malloc returning null
 
-    size_t reqsize = required_size(size);
+    // need to round up
     size_t blocksize = BLKSIZE(blockhdr);
-    if (blocksize < reqsize) { // upsize
+    if (blocksize < size) { // upsize
         void *newptr = ye_malloc(size); // round up to 16, split done in ye_malloc
         if (newptr == NULL) {
             return NULL;
@@ -39,10 +43,10 @@ void *ye_realloc(void *ptr, size_t size) {
         memcpy(newptr, ptr, size);
         ye_free(ptr);
         return newptr;
-    } else if (blocksize > reqsize) { // downsize
-        if (can_split(blockhdr, reqsize)) { // repeated code with free..
-            ye_header *newhdr = split(blockhdr, reqsize);
-            try_coalesce_up(newhdr);
+    } else if (blocksize > size) { // downsize
+        if (SPLITTABLE(blockhdr, size)) { // repeated code with free..
+            ye_header *newhdr = split(blockhdr, size);
+            try_coalesce_next(newhdr);
             prepare(blockhdr, size, 1);
         }
     }
@@ -55,7 +59,7 @@ void ye_free(void *ptr) {
         error("Attempted to free non-allocated memory.");
         abort();
     }
-    try_coalesce_up(blockhdr);
+    try_coalesce_next(blockhdr);
     blockhdr->alloc = 0;
     ((ye_header *)FOOTER(blockhdr))->alloc = 0;
 }

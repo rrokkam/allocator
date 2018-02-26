@@ -3,36 +3,7 @@
 #include "simulator.h"
 #include "segfreelist.h"
 #include "utils.h"
-#include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-
-void ye_snapshot() {
-    ye_header *head;
-    for (int index = 0; index < NUM_LISTS; index++) {
-        head = seglist[index].head;
-        if (head != NULL) {
-            info("FREE LIST %d:", index);
-            for (ye_header *block = head; block != NULL; block = block->next) {
-                ye_blockprint(block);
-            }
-        }
-    }
-}
-
-/* TODO: this is on one line for the compiler's sake.. how to fix? */
-void ye_blockprint(ye_header *block) {
-    info("Block at %p: \n\
-         size: %u \n\
-         allocated: %s \n\
-         next: %p \n\
-         prev: %p",
-         block, block->size, block->alloc, block->next, block->prev);
-}
-
-void ye_varprint(void *data) {
-    ye_blockprint(data - YE_HEADER_SIZE);
-}
 
 // TODO: Decide whether seg_add should coalesce and do it here if it doesn't
 void *addpage() {
@@ -45,8 +16,36 @@ void *addpage() {
     return pghdr;
 }
 
-void prepare(ye_header *hdr, size_t size, bool alloc) {
+void prepare(ye_header *hdr, size_t rsize, bool alloc) {
     ye_header *ftr = FOOTER(hdr);
-    hdr->size = ftr->size = size >> 4;
+    hdr->size = ftr->size = rsize >> 4;
     hdr->alloc = ftr->alloc = alloc;
+}
+
+// sets the new header to free and the old header to allocated by default.
+ye_header *split(ye_header *hdr, size_t rsize) {
+    ye_header *newhdr = ((void *) hdr) + size;
+    prepare(newhdr, BLKSIZE(hdr) - rsize, 0);
+    try_coalesce_next(newhdr);
+    prepare(hdr, rsize, 1);
+    return newhdr;
+}
+
+bool try_coalesce_next(ye_header *hdr) {
+    ye_header *nexthdr = nextblock(blockhdr);
+    if(nexthdr != NULL && !ALLOCATED(nexthdr)) {
+        seg_rm(nexthdr);
+        coalesce(blockhdr, nexthdr);
+    }
+    seg_add(blockhdr);    
+}
+
+// should this take a block that is or isn't in the segfreelist?
+bool try_coalesce_prev(ye_header *hdr) {
+    ye_header *prevhdr = prevblock(hdr);
+    if(prevhdr != NULL && !ALLOCATED(prevhdr)) {
+        seg_rm(nexthdr);
+        coalesce(blockhdr, nexthdr);
+    }
+    seg_add(blockhdr);
 }
