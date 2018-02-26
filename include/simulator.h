@@ -1,7 +1,7 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
-#define NM_PAGES 16  // Set >= 1 TODO: fix name
+#define NUM_PAGES 16  // Set >= 1
 #define PAGE_SIZE 1024  // 1 KB
 
 /*

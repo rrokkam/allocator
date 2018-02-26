@@ -24,7 +24,7 @@
  * - Rewrite debug functions to print out state of lists
  *
  */
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
     exit(EXIT_SUCCESS); // placeholder for compilation
     // setup();
     // void *x = ye_malloc(sizeof(double) * 8);

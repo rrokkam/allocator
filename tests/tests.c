@@ -26,7 +26,7 @@
 //  ye_header *header = (ye_header*)((char*)x - 8);
 
 //  /* There should be one block of size 4064 in list 3 */
-//  free_list *fl = &seg_free_list[find_list_index_from_size(PAGE_SZ - (header->block_size << 4))];
+//  free_list *fl = &seg_free_list[find_list_index_from_size(PAGE_SIZE - (header->block_size << 4))];
 
 //  cr_assert_not_null(fl, "Free list is null");
 
@@ -35,12 +35,12 @@
 //  cr_assert(fl->head->header.block_size << 4 == 4064);
 //  cr_assert(fl->head->header.allocated == 0);
 //  cr_assert(errno == 0, "errno is not zero!");
-//  cr_assert(get_heap_start() + PAGE_SZ == get_heap_end(), "Allocated more than necessary!");
+//  cr_assert(get_heap_start() + PAGE_SIZE == get_heap_end(), "Allocated more than necessary!");
 // }
 
 // Test(ye_memsuite_student, Malloc_over_four_pages, .init = ye_mem_init, .fini = ye_mem_fini) {
 //  errno = 0;
-//  void *x = ye_malloc(PAGE_SZ << 2);
+//  void *x = ye_malloc(PAGE_SIZE << 2);
 
 //  cr_assert_null(x, "x is not NULL!");
 //  cr_assert(errno == ENOMEM, "errno is not ENOMEM!");
@@ -193,7 +193,7 @@
 //      "List 2 min not placed in list 2");
 //  cr_assert(seg_listindex(LIST_2_MIN - 1) == 0,
 //      "Number less than List 2 min not placed in list 1");
-//  cr_assert(seg_listindex(PAGE_SZ << 1) == 3, "2048 not in list 4");
+//  cr_assert(seg_listindex(PAGE_SIZE << 1) == 3, "2048 not in list 4");
 // }
 
 // Test(ye_memsuite_student, required_block_size, .init = ye_mem_init, .fini = ye_mem_fini) {
@@ -225,18 +225,18 @@
 
 // Test(ye_memsuite_student, malloc_overlap_pages, .init = ye_mem_init, .fini = ye_mem_fini) {
 //  void *x = ye_malloc(sizeof(int));
-//  void *y = ye_malloc(PAGE_SZ);
+//  void *y = ye_malloc(PAGE_SIZE);
 
 //  cr_assert_not_null(x, "x is NULL!");
 //  cr_assert_not_null(y, "y is NULL!");
 
 //  cr_assert(errno == 0, "Unexpected error given");
 //  ye_header *header = (ye_header *)((char *)y - 8);
-//  cr_assert(header->block_size << 4 == PAGE_SZ + 16, "Block size was not what was expected!");
+//  cr_assert(header->block_size << 4 == PAGE_SIZE + 16, "Block size was not what was expected!");
 //  cr_assert(header->allocated == 1, "Allocated bit is not set!");
 // //   cr_assert(header->padded == 0, "Padded bit is set!");
 
-//  cr_assert(get_heap_end() - get_heap_start() == 2*PAGE_SZ, "Sbrk not called twice!");
+//  cr_assert(get_heap_end() - get_heap_start() == 2*PAGE_SIZE, "Sbrk not called twice!");
 
 // }
 

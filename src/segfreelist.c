@@ -1,3 +1,4 @@
+#include <errno.h>
 #include "segfreelist.h"
 #include "debug.h"
 #include "allocator.h"
@@ -43,11 +44,11 @@ int seg_index(size_t size) {
 }
 
 ye_header *seg_head(ye_header *blockhdr) {
-    return seglist[seg_index(BLOCKSIZE(blockhdr))].head;
+    return seglist[seg_index(BLKSIZE(blockhdr))].head;
 }
 
 void seg_add(ye_header *blockhdr) {
-    int index = seg_index(BLOCKSIZE(blockhdr));
+    int index = seg_index(BLKSIZE(blockhdr));
     ye_header *old_head = seglist[index].head;
     seglist[index].head = blockhdr;
     blockhdr->next = old_head;
@@ -58,7 +59,7 @@ void seg_add(ye_header *blockhdr) {
 }
 
 void seg_rm(ye_header *blockhdr) {
-    int index = seg_index(BLOCKSIZE(blockhdr));
+    int index = seg_index(BLKSIZE(blockhdr));
     ye_header *prevhdr = blockhdr->prev;
     ye_header *nexthdr = blockhdr->next;
     if (prevhdr != NULL) {
@@ -74,21 +75,22 @@ void seg_rm(ye_header *blockhdr) {
 // TODO: seg_find with calling ye_sbrk properly.
 ye_header *seg_find(size_t size) {
     ye_header *blockhdr, *pghdr, *newhdr;
-    for(int i = seg_index(size); i < NUM_LISTS; i++) {
+    for (int i = seg_index(size); i < NUM_LISTS; i++) {
         blockhdr = seglist[i].head;
-        while(blockhdr != NULL) {
-            if(BLOCKSIZE(blockhdr) >= size) return blockhdr;
-            blockhdr = blockhdr->next;
+        for (blockhdr = seglist[i].head; blockhdr != NULL; blockhdr = blockhdr->next) {
+            if (BLKSIZE(blockhdr) >= size) {
+                return blockhdr;
+            }
         }
     }
 
-    do { // Didn't find a block of sufficient size, time to sbrk.
-        if((pghdr = addpage()) == NULL) return NULL;
-        /* newhdr = seg_add(pghdr); */
-
-
+    do { // Didn't find a block of sufficient size, time to ye_sbrk a page at a time.
+        if ((pghdr = addpage()) == NULL) {
+            errno = ENOMEM;
+            return NULL;
+        }
         blockhdr = prevblock(pghdr); // try_coalesce_down
-        if(blockhdr != NULL && !ALLOCATED(blockhdr)) { // handles before getheapstart
+        if (blockhdr != NULL && !ALLOCATED(blockhdr)) { // handles before getheapstart
             seg_rm(blockhdr); // extra inserts and removes are a little silly
                                     // but are needed for coalesce to work properly.
             coalesce(blockhdr, pghdr);
@@ -98,6 +100,7 @@ ye_header *seg_find(size_t size) {
             seg_add(pghdr);
             newhdr = pghdr;
         }
-    } while (BLOCKSIZE(newhdr) < size); // don't need to check the rest, this is biggest
+    } while (BLKSIZE(newhdr) < size); // don't need to check the rest, this is biggest
+    seg_rm(newhdr);
     return newhdr;
 }

@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef HELPERS_H
+#define HELPERS_H
 
 #include "allocator.h"
 #include "segfreelist.h"
@@ -13,10 +13,10 @@
 
 #define TERMINATE(no) {errno = no; return NULL;}
 
-#define BLKSIZE(ptr) (((ye_header *)ptr)->block_size << 4)
+#define BLKSIZE(ptr) (((ye_header *)ptr)->size << 4)
 #define FOOTER(ptr) ((void *)ptr + BLKSIZE(ptr) - YE_HEADER_SIZE)
 #define HEADER(ptr) ((void *)ptr - BLKSIZE(ptr) + YE_HEADER_SIZE)
-#define ALLOCATED(ptr) (((ye_header *)ptr)->allocated)
+#define ALLOCATED(ptr) (((ye_header *)ptr)->alloc)
 #define VALIDSIZE(size) ((size != 0) && ((uint16_t)size <= MAX_BLOCK_SIZE))
 #define PAYLOADSIZE(size) (size - YE_OVERHEAD)
 
@@ -50,8 +50,26 @@ void ye_blockprint(ye_header *block);
  */
 void ye_varprint(void *data);
 
-void prepare(ye_header *hdr, size_t size, bool alloc);
+
+
+void prepare(void *blockhdr, size_t size, bool allocated);
+
+void coalesce(void *firsthdr, void *secondhdr);
+
+void try_coalesce_up(void *blockhdr);
+
+size_t required_size(size_t size);
+
+bool can_split(void *blockhdr, size_t size);
+
+void *split(void *blockhdr, size_t size);
+
+bool valid_block(void *ptr);
 
 void *addpage();
 
-#endif /* UTILS_H */
+void *nextblock(void *blockhdr);
+
+void *prevblock(void *blockhdr);
+
+#endif /* HELPERS_H */
