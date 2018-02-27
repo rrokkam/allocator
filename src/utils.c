@@ -49,3 +49,19 @@ bool try_coalesce_prev(ye_header *hdr) {
     }
     seg_add(blockhdr);
 }
+
+void *nextblock(void *blockhdr) {
+    void *nexthdr = blockhdr + BLOCKSIZE(blockhdr);
+    if(nexthdr + SF_HEADER_SIZE_BYTES > get_heap_end()
+        || !valid_block(nexthdr)) return NULL;
+    return nexthdr;
+}
+
+void *prevblock(void *blockhdr) {
+    void *prevftr = blockhdr - SF_FOOTER_SIZE_BYTES;
+    if(prevftr < get_heap_start() ||
+        BLOCKSIZE(prevftr) < MIN_BLOCK_SIZE) return NULL;
+    void *prevhdr = HEADER(prevftr);
+    if(prevhdr < get_heap_start() || !valid_block(prevhdr)) return NULL;
+    return prevhdr;
+}

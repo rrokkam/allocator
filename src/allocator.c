@@ -54,14 +54,14 @@ void *ye_realloc(void *ptr, size_t size) {
 }
 
 void ye_free(void *ptr) {
-    ye_header *blockhdr = ptr - YE_HEADER_SIZE;
-    if (!ALLOCATED(blockhdr)) {
+    ye_header *hdr = ptr - YE_HEADER_SIZE;
+    if (!ALLOCATED(hdr)) {
         error("Attempted to free non-allocated memory.");
         abort();
     }
-    try_coalesce_next(blockhdr);
-    blockhdr->alloc = 0;
-    ((ye_header *)FOOTER(blockhdr))->alloc = 0;
+    try_coalesce(hdr);
+    hdr->alloc = 0;
+    ((ye_header *) FOOTER(hdr))->alloc = 0;
 }
 
 void *ye_calloc(size_t nmemb, size_t size) {
