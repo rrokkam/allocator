@@ -1,6 +1,6 @@
 #ifndef ALLOCATOR_H
 #define ALLOCATOR_H
-    
+
 /*
  * Acquires uninitialized memory that is aligned properly.
  *

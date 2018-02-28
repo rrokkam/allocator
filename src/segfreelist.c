@@ -1,5 +1,8 @@
-#include <errno.h>
 #include "segfreelist.h"
+
+#include <errno.h>
+
+#include "simulator.h"
 #include "debug.h"
 #include "allocator.h"
 #include "utils.h"
@@ -40,11 +43,11 @@ int seg_index(size_t rsize) {
 }
 
 ye_header *seg_head(ye_header *hdr) {
-    return seglist[seg_index(BLKSIZE(hdr))].head;
+    return seglist[seg_index(BLOCKSIZE(hdr))].head;
 }
 
 void seg_add(ye_header *hdr) {
-    int index = seg_index(BLKSIZE(hdr));
+    int index = seg_index(BLOCKSIZE(hdr));
     ye_header *old_head = seglist[index].head;
     seglist[index].head = hdr;
     hdr->next = old_head;
@@ -55,7 +58,7 @@ void seg_add(ye_header *hdr) {
 }
 
 void seg_rm(ye_header *hdr) {
-    int index = seg_index(BLKSIZE(hdr));
+    int index = seg_index(BLOCKSIZE(hdr));
     ye_header *prevhdr = hdr->prev;
     ye_header *nexthdr = hdr->next;
     if (prevhdr != NULL) {
@@ -68,13 +71,26 @@ void seg_rm(ye_header *hdr) {
     }
 }
 
+static void *add_page() {
+    ye_header *hdr = ye_sbrk(PAGE_SIZE);
+    if (hdr == (void *) -1) {
+        return NULL; // errno set to ENOMEM by ye_sbrk
+    }
+    ye_header *ftr = FOOTER(hdr);
+    hdr->size = ftr->size = PAGE_SIZE >> 4;
+    hdr->alloc = ftr->alloc = 0;
+    try_coalesce_backwards(hdr); // TODO: assumes you're in the free list!!
+    seg_add(hdr);
+    return hdr;
+}
+
 // TODO: seg_find with calling ye_sbrk properly.
 ye_header *seg_find(size_t size) {
     ye_header *hdr, *pghdr, *newhdr;
     for (int i = seg_index(size); i < NUM_LISTS; i++) {
         hdr = seglist[i].head;
         for (hdr = seglist[i].head; hdr != NULL; hdr = hdr->next) {
-            if (BLKSIZE(hdr) >= size) {
+            if (BLOCKSIZE(hdr) >= size) {
                 return hdr;
             }
         }
@@ -89,14 +105,14 @@ ye_header *seg_find(size_t size) {
         if (hdr != NULL && !ALLOCATED(hdr)) { // handles before getheapstart
             seg_rm(hdr); // extra inserts and removes are a little silly
                                     // but are needed for coalesce to work properly.
-            try_coalesce_next(hdr, pghdr);
+            try_coalesce_forwards(hdr, pghdr);
             seg_add(hdr);
             newhdr = hdr;
         } else {
             seg_add(pghdr);
             newhdr = pghdr;
         }
-    } while (BLKSIZE(newhdr) < size); // don't need to check the rest, this is biggest
+    } while (BLOCKSIZE(newhdr) < size); // don't need to check the rest, this is biggest
     seg_rm(newhdr);
     return newhdr;
 }

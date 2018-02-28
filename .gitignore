@@ -2,3 +2,6 @@ bin/
 build/
 utils_c
 utils_h
+utils2_c
+utils2_h
+allocator_c

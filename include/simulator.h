@@ -1,8 +1,15 @@
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
+#include "segfreelist.h"
+
 #define NUM_PAGES 16  // Set >= 1
 #define PAGE_SIZE 1024  // 1 KB
+
+#define NUM_SMALL_LISTS 6 // lists with blocks of only one size
+#define NUM_LISTS 11 // includes small lists
+
+extern freelist seglist[NUM_LISTS];
 
 /*
  * Any program using the sfmm library must call this function ONCE

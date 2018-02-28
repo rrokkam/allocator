@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include "simulator.h"
-#include "allocator.h"
 #include <stdlib.h>
-
-#include "segfreelist.h"
 
 /*
  * TODO:
@@ -17,6 +11,7 @@
  *
  * - Functions that support this:
  *     - try_coalesce_forwards: if next block is free, coalesce. Either way, add it to the free list.
+ *     - try_coalesce_backwards: if prev block is free, coalesce. Either way, add it to the free list. // in addpage
  *     - try_split_coalesce_forwards: if splittable, split and call try_coalesce_forwards on the new block.
  *     - try_coalesce_bidir: attempt to coalesce in both directions before adding to the free list.
  *

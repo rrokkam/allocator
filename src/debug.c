@@ -1,4 +1,6 @@
 #include "debug.h"
+
+#include "simulator.h"
 #include "segfreelist.h"
 
 void ye_snapshot() {
