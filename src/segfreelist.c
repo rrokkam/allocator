@@ -5,7 +5,6 @@
 #include "simulator.h"
 #include "debug.h"
 #include "allocator.h"
-#include "utils.h"
 
 freelist seglist[NUM_LISTS];
 

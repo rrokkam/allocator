@@ -1,4 +1,4 @@
-//#include "newallocator.h"
+#include "allocator.h"
 #include "debug.h"
 
 #include <string.h>

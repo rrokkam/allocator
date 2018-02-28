@@ -1,6 +1,8 @@
 #ifndef ALLOCATOR_H
 #define ALLOCATOR_H
 
+#include <stdlib.h>  // for size_t
+
 /*
  * Acquires uninitialized memory that is aligned properly.
  *
