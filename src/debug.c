@@ -9,22 +9,22 @@ void ye_snapshot() {
         head = seglist[index].head;
         if (head != NULL) {
             info("FREE LIST %d:", index);
-            for (ye_header *block = head; block != NULL; block = block->next) {
-                ye_blockprint(block);
+            for (ye_header *hdr = head; hdr != NULL; hdr = hdr->next) {
+                ye_blockprint(hdr);
             }
         }
     }
 }
 
-void ye_blockprint(ye_header *block) {
+void ye_blockprint(ye_header *hdr) {
     info("Block at %p: \n\
          size: %u \n\
          allocated: %s \n\
          next: %p \n\
          prev: %p",
-         block, block->size, block->alloc, block->next, block->prev);
+         hdr, hdr->size, hdr->alloc, hdr->next, hdr->prev);
 }
 
 void ye_varprint(void *data) {
-    ye_blockprint(data - YE_HEADER_SIZE);
+    ye_blockprint(data - sizeof(ye_header));
 }

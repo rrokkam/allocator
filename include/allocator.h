@@ -1,7 +1,7 @@
 #ifndef ALLOCATOR_H
 #define ALLOCATOR_H
 
-#include <stdlib.h>  // for size_t
+#include <stddef.h>  // for size_t
 
 /* Documentation from this file is adapted from glibc's malloc docs. */
 
