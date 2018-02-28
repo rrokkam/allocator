@@ -17,6 +17,29 @@
 /* Get the size of a block from the header */
 #define BLOCKSIZE(hdr) (((ye_header *)hdr)->size << 4)
 
+static ye_header *nextblock(ye_header *hdr) {
+    return NULL;
+}
+
+
+static ye_header *prevblock(ye_header *hdr) {
+    return NULL;
+}
+
+static void try_coalesce_bidir(ye_header *hdr) {
+    // filler to suppress errors
+    if (prevblock(hdr) != NULL)
+        hdr++;
+}
+
+static void try_coalesce_forwards(ye_header *hdr, ye_header *nexthdr) {
+    //
+}
+
+static void try_split_coalesce_forwards(ye_header *hdr, size_t size) {
+    //
+}
+
 void *ye_malloc(size_t size) {
     size_t rsize = ROUND(size);
     ye_header *hdr = seg_find(rsize);
@@ -32,7 +55,7 @@ void ye_free(void *ptr) {
         error("Double free or corruption occurred at %p.", ptr);
         abort();
     }
-    try_coalesce_insert(hdr);
+    try_coalesce_bidir(hdr);
 }
 
 void *ye_calloc(size_t nmemb, size_t size) {
@@ -54,8 +77,8 @@ void *ye_realloc(void *ptr, size_t size) {
     size_t bsize = BLOCKSIZE(hdr);
     if (bsize < size) { // upsizing
         ye_header *nexthdr = nextblock(hdr);
-        if (!ALLOCATED(nexthdr) && (bsize + BLOCKSIZE(nexthdr) >= size)) {
-            coalesce_forwards(hdr, nexthdr);
+        if (bsize + BLOCKSIZE(nexthdr) >= size) {
+            try_coalesce_forwards(hdr, nexthdr);
         } else { // need to move to another location
             void *newptr = ye_malloc(size); // get a well-fitting block of memory
             if (newptr == NULL) {
