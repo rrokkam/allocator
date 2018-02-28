@@ -76,12 +76,13 @@ static void *add_page() {
     ye_header *ftr = FOOTER(hdr);
     hdr->size = ftr->size = PAGE_SIZE >> 4;
     hdr->alloc = ftr->alloc = 0;
-    try_coalesce_backwards(hdr); // TODO: assumes you're in the free list!!
+    try_coalesce_backwards(hdr);
     seg_add(hdr);
     return hdr;
 }
 
 // TODO: seg_find with calling ye_sbrk properly.
+// Also need to split and coalesce here
 ye_header *seg_find(size_t size) {
     ye_header *hdr, *pghdr, *newhdr;
     for (int i = seg_index(size); i < NUM_LISTS; i++) {
@@ -111,5 +112,6 @@ ye_header *seg_find(size_t size) {
         }
     } while (BLOCKSIZE(newhdr) < size); // don't need to check the rest, this is biggest
     seg_rm(newhdr);
+    // TODO: try_split_coalesce_forwards? (note --  it takes rounded size - already rounded by malloc)
     return newhdr;
 }

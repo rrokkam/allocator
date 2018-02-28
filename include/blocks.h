@@ -7,17 +7,16 @@
 #define SIZE_BITS 60 // realistically this can only go up to 16. set to 28 on 32 bit system
 #define UNUSED 3
 #define ALLOCATED_BIT 1
-#define YE_HEADER_SIZE (2 * (SIZE_BITS + UNUSED + ALLOCATED_BIT) >> 3)  // 8 bytes
 
 #define MIN_PAYLOAD_SIZE 16  // blocks need to be double word aligned.
-#define MIN_BLOCK_SIZE (2 * YE_HEADER_SIZE + MIN_PAYLOAD_SIZE)
+#define MIN_BLOCK_SIZE (2 * sizeof(ye_header) + MIN_PAYLOAD_SIZE)
 #define MAX_BLOCK_SIZE ((uint16_t) -1) 
 
 /* Get the header of a block from a payload pointer */
 #define HEADER(payload) ((void *) payload - sizeof(ye_header))
 
-
-#define FOOTER(ptr) ((void *)ptr + BLOCKSIZE(ptr) - YE_HEADER_SIZE)
+/* Get the footer of a block from the header. */
+#define FOOTER(hdr) ((void *)hdr + BLOCKSIZE(hdr) - sizeof(ye_header))
 
 /* Evaluate to 1 if allocated, and 0 if free */
 #define ALLOCATED(hdr) (((ye_header *) hdr)->alloc)
@@ -41,7 +40,7 @@ void try_coalesce_bidir(ye_header *hdr);
 
 void try_coalesce_forwards(ye_header *hdr, ye_header *nexthdr);
 
-void try_coalesce_backwards(ye_header *hdr); // TODO: assumes you're in the free list!!
+void try_coalesce_backwards(ye_header *hdr); // hdr is NOT in the free list.
 
 void try_split_coalesce_forwards(ye_header *hdr, size_t size);
 

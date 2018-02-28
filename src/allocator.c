@@ -53,12 +53,13 @@ void *ye_realloc(void *ptr, size_t size) {
     }
     ye_header *hdr = HEADER(ptr);
     size_t bsize = BLOCKSIZE(hdr);
-    if (bsize < size) { // upsizing
+    size_t rsize = ROUND(size);
+    if (bsize < rsize) { // upsizing
         ye_header *nexthdr = nextblock(hdr);
-        if (bsize + BLOCKSIZE(nexthdr) >= size) {
-            try_coalesce_forwards(hdr, nexthdr);
+        if (bsize + BLOCKSIZE(nexthdr) >= rsize) {
+            try_coalesce_forwards(hdr, nexthdr);  // TODO: check this usage
         } else { // need to move to another location
-            void *newptr = ye_malloc(size); // get a well-fitting block of memory
+            void *newptr = ye_malloc(rsize); // get a well-fitting block of memory
             if (newptr == NULL) {
                 return NULL;
             }
@@ -66,8 +67,8 @@ void *ye_realloc(void *ptr, size_t size) {
             ye_free(ptr);
             return newptr;
         }
-    } else if (bsize > size) { // downsizing
-        try_split_coalesce_forwards(hdr, size);
+    } else if (bsize > rsize) { // downsizing
+        try_split_coalesce_forwards(hdr, rsize);
     }
-    return ptr; // if blocksize == size, we do nothing. If downsizing, fall through.
+    return ptr; // if bsize == size, NOOP. If the memory isn't moved, fall through.
 }
