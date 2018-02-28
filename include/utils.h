@@ -20,12 +20,14 @@
 
 void prepare(ye_header *hdr, size_t rsize, bool alloc);
 
-void *addpage();
+void *add_page();
 
 ye_header *split(ye_header *hdr, size_t rsize);
 
-bool try_coalesce_next(ye_header *hdr);
+void try_coalesce_next(ye_header *hdr);
 
-bool try_coalesce_prev(ye_header *hdr);
+void try_coalesce_prev(ye_header *hdr);
+
+void try_coalesce(ye_header *hdr); 
 
 #endif /* UTILS_H */

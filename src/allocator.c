@@ -7,7 +7,13 @@
 #include <errno.h>
 
 #define SPLITTABLE(hdr, size) ((BLKSIZE(hdr) - (size_t) size) >= MIN_BLOCK_SIZE)
+
+// round up to the nearest multiple of 8
 #define ROUND(size) ((((size_t) size & ~0x07) + 8 * (((size_t) size & 0x07) != 0)))
+
+#define HDR(payload) ((void *) payload - sizeof(ye_header))
+
+#define BLKSIZE(ptr) (((ye_header *)ptr)->size << 4)
 
 void *ye_malloc(size_t size) {
     size_t rsize = ROUND(size);
@@ -15,26 +21,29 @@ void *ye_malloc(size_t size) {
     if (hdr == NULL) {
         return NULL;
     }
-
-    if(SPLITTABLE(hdr, rsize)) {
-        ye_header *newhdr = split(hdr, rsize); // prepares the split off block
-        // TODO: coalesce newhdr with next if possible
-        seg_add(newhdr);
-    }
-    prepare(hdr, rsize, 1);
-
-    return ((void *) hdr) + YE_HEADER_SIZE;
+    return hdr++;  // points right after the header (to the payload)
 }
 
+// TODO: this belongs in seg_find
+    // if(SPLITTABLE(hdr, rsize)) {
+    //     ye_header *newhdr = split(hdr, rsize); // prepares the split off block
+    //     // TODO: coalesce newhdr with next if possible
+    //     seg_add(newhdr);
+    // }
+    // prepare(hdr, rsize, 1);
+
+    //return ((void *) hdr) + YE_HEADER_SIZE;
+
 void *ye_realloc(void *ptr, size_t size) {
-    ye_header *blockhdr = ptr - YE_HEADER_SIZE;
     if (size == 0) {
         ye_free(ptr);
         return NULL;
-    } // size too big case is covered by valid_block and malloc returning null
+    }
+
+    ye_header *hdr = HDR(ptr);
 
     // need to round up
-    size_t blocksize = BLKSIZE(blockhdr);
+    size_t blocksize = BLKSIZE(hdr);
     if (blocksize < size) { // upsize
         void *newptr = ye_malloc(size); // round up to 16, split done in ye_malloc
         if (newptr == NULL) {
@@ -44,17 +53,17 @@ void *ye_realloc(void *ptr, size_t size) {
         ye_free(ptr);
         return newptr;
     } else if (blocksize > size) { // downsize
-        if (SPLITTABLE(blockhdr, size)) { // repeated code with free..
-            ye_header *newhdr = split(blockhdr, size);
+        if (SPLITTABLE(hdr, size)) { // repeated code with free..
+            ye_header *newhdr = split(hdr, size);
             try_coalesce_next(newhdr);
-            prepare(blockhdr, size, 1);
+            prepare(hdr, size, 1);
         }
     }
     return ptr;
 }
 
 void ye_free(void *ptr) {
-    ye_header *hdr = ptr - YE_HEADER_SIZE;
+    ye_header *hdr = ptr - sizeof(ye_header);
     if (!ALLOCATED(hdr)) {
         error("Attempted to free non-allocated memory.");
         abort();

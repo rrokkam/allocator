@@ -39,25 +39,25 @@ int seg_index(size_t rsize) {
     }
 }
 
-ye_header *seg_head(ye_header *blockhdr) {
-    return seglist[seg_index(BLKSIZE(blockhdr))].head;
+ye_header *seg_head(ye_header *hdr) {
+    return seglist[seg_index(BLKSIZE(hdr))].head;
 }
 
-void seg_add(ye_header *blockhdr) {
-    int index = seg_index(BLKSIZE(blockhdr));
+void seg_add(ye_header *hdr) {
+    int index = seg_index(BLKSIZE(hdr));
     ye_header *old_head = seglist[index].head;
-    seglist[index].head = blockhdr;
-    blockhdr->next = old_head;
-    blockhdr->prev = NULL;
+    seglist[index].head = hdr;
+    hdr->next = old_head;
+    hdr->prev = NULL;
     if (old_head != NULL) {
-        old_head->prev = blockhdr;  
+        old_head->prev = hdr;  
     }
 }
 
-void seg_rm(ye_header *blockhdr) {
-    int index = seg_index(BLKSIZE(blockhdr));
-    ye_header *prevhdr = blockhdr->prev;
-    ye_header *nexthdr = blockhdr->next;
+void seg_rm(ye_header *hdr) {
+    int index = seg_index(BLKSIZE(hdr));
+    ye_header *prevhdr = hdr->prev;
+    ye_header *nexthdr = hdr->next;
     if (prevhdr != NULL) {
         prevhdr->next = nexthdr;
     } else {
@@ -70,28 +70,28 @@ void seg_rm(ye_header *blockhdr) {
 
 // TODO: seg_find with calling ye_sbrk properly.
 ye_header *seg_find(size_t size) {
-    ye_header *blockhdr, *pghdr, *newhdr;
+    ye_header *hdr, *pghdr, *newhdr;
     for (int i = seg_index(size); i < NUM_LISTS; i++) {
-        blockhdr = seglist[i].head;
-        for (blockhdr = seglist[i].head; blockhdr != NULL; blockhdr = blockhdr->next) {
-            if (BLKSIZE(blockhdr) >= size) {
-                return blockhdr;
+        hdr = seglist[i].head;
+        for (hdr = seglist[i].head; hdr != NULL; hdr = hdr->next) {
+            if (BLKSIZE(hdr) >= size) {
+                return hdr;
             }
         }
     }
 
     do { // Didn't find a block of sufficient size, time to ye_sbrk a page at a time.
-        if ((pghdr = addpage()) == NULL) {
+        if ((pghdr = add_page()) == NULL) {
             errno = ENOMEM;
             return NULL;
         }
-        blockhdr = prevblock(pghdr); // try_coalesce_down
-        if (blockhdr != NULL && !ALLOCATED(blockhdr)) { // handles before getheapstart
-            seg_rm(blockhdr); // extra inserts and removes are a little silly
+        hdr = prevblock(pghdr); // try_coalesce_down
+        if (hdr != NULL && !ALLOCATED(hdr)) { // handles before getheapstart
+            seg_rm(hdr); // extra inserts and removes are a little silly
                                     // but are needed for coalesce to work properly.
-            coalesce(blockhdr, pghdr);
-            seg_add(blockhdr);
-            newhdr = blockhdr;
+            try_coalesce_next(hdr, pghdr);
+            seg_add(hdr);
+            newhdr = hdr;
         } else {
             seg_add(pghdr);
             newhdr = pghdr;

@@ -34,8 +34,8 @@ typedef struct {
 extern freelist seglist[NUM_LISTS];
 
 void seg_init();
-void seg_add(ye_header *blockhdr);
-void seg_rm(ye_header *blockhdr);
+void seg_add(ye_header *hdr);
+void seg_rm(ye_header *hdr);
 ye_header *seg_find(size_t rsize);
 
 #endif /* SEGLIST_H */

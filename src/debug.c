@@ -1,4 +1,5 @@
 #include "debug.h"
+#include "segfreelist.h"
 
 void ye_snapshot() {
     ye_header *head;
