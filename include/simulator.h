@@ -4,7 +4,7 @@
 #include "segfreelist.h"
 
 #define NUM_PAGES 16  // Set >= 1
-#define PAGE_SIZE 1024  // 1 KB
+#define PAGE_SIZE 1024  // Double word aligned and preferably a power of 2.
 
 #define NUM_SMALL_LISTS 6 // lists with blocks of only one size
 #define NUM_LISTS 11 // includes small lists

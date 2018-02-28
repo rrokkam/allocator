@@ -6,8 +6,6 @@
 #include "debug.h"
 #include "allocator.h"
 
-freelist seglist[NUM_LISTS];
-
 /* 
  * Initialize segmented free list with mins and maxes
  * from 0 to 5: linearly spaced. 16, 24, 32, 40, 48, 56.

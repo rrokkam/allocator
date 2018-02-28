@@ -10,6 +10,9 @@
 #define ROUND(size) (((size_t) size & ~0x07) + 8 * (((size_t) size & 0x07) != 0))
 
 void *ye_malloc(size_t size) {
+    if (size == 0) {
+        return NULL;
+    }
     size_t rsize = ROUND(size);
     ye_header *hdr = seg_find(rsize);
     if (hdr == NULL) {
@@ -19,6 +22,9 @@ void *ye_malloc(size_t size) {
 }
 
 void ye_free(void *ptr) {
+    if (ptr == NULL) {
+        return;
+    }
     ye_header *hdr = HEADER(ptr);
     if (!ALLOCATED(hdr)) {
         error("Double free or corruption occurred at %p.", ptr);
@@ -38,6 +44,9 @@ void *ye_calloc(size_t nmemb, size_t size) {
 }
 
 void *ye_realloc(void *ptr, size_t size) {
+    if (ptr == NULL) {
+        return ye_malloc(size);
+    }
     if (size == 0) {
         ye_free(ptr);
         return NULL;

@@ -8,6 +8,8 @@ void *min_brk;
 void *cur_brk;
 void *max_brk;
 
+freelist seglist[NUM_LISTS];
+
 // will automatically mmap if size is too large.
 void setup() {
     min_brk = malloc(NUM_PAGES * PAGE_SIZE);

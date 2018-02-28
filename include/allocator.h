@@ -3,49 +3,57 @@
 
 #include <stdlib.h>  // for size_t
 
+/* Documentation from this file is adapted from glibc's malloc docs. */
+
 /*
- * Acquires uninitialized memory that is aligned properly.
- *
- * @param size The number of bytes requested to be allocated.
- *
- * @return If successful, the pointer to a valid region of memory of the
- * requested size is returned, else NULL is returned and errno as follows:
- *
- * If size is invalid (0 or greater than 4 pages), errno is set to EINVAL
- * If the request cannot be satisfied, errno is set to ENOMEM
+ * Allocates size bytes of memory. The memory is not initialized. 
+ * The pointer returned is double-word aligned. 
+ * 
+ * If size is 0, then ye_malloc returns NULL. If there is not enough memory
+ * to satisfy the request, ye_malloc returns NULL and sets errno to ENOMEM.
+ * 
+ * TODO: guarantee alignment.
  */
 void *ye_malloc(size_t size);
 
 /*
- * Resizes the memory pointed to by ptr to size bytes.
+ * Frees the memory space pointed to by ptr, which must have been
+ * returned by a previous call to ye_malloc, ye_calloc, or ye_realloc.
  *
- * @param ptr Address of the memory region to resize.
- * @param size The minimum size to resize the memory to.
- *
- * @return If successful, the pointer to a valid region of memory is
- * returned, else NULL is returned and errno is set appropriately.
- *
- * If there is no memory available ye_realloc should set errno to ENOMEM.
- * If ye_realloc is called with an invalid pointer errno should be set to EINVAL.
- *
- * If ye_realloc is called with a valid pointer and a size of 0 it should free
- * the allocated block and return NULL.
- */
-void *ye_realloc(void *ptr, size_t size);
-
-/*
- * Marks a dynamically allocated region as no longer in use.
- * Adds the newly freed block to the free list.
- *
- * @param ptr Address of memory returned by the function ye_malloc.
- *
- * If ptr is invalid, the function calls abort() to exit the program.
+ * If ptr was not returned by a such call, or if ye_free(ptr) was previously
+ * called, then the result of ye_free is undefined. If ptr is NULL, then
+ * no operation is performed.
  */
 void ye_free(void *ptr);
 
 /*
- * TODO: Documentation of calloc
+ * Allocates memory for an array of nmemb objects of size bytes each.
+ * The memory is initialized to 0.
+ *
+ * If either nmemb or size is 0, then ye_calloc returns NULL. If there is 
+ * not enough memory to satisfy the request, ye_calloc returns NULL and
+ * sets errno to ENOMEM.
  */
 void *ye_calloc(size_t nmemb, size_t size);
+
+/*
+ * Resizes the memory pointed to by ptr to size bytes. The contents of
+ * the memory region between the start of the region and the minimum of
+ * the old and new sizes. 
+ *
+ * If the new size is larger than the current size, the new memory will
+ * not be initialized. 
+ *
+ * If ptr is NULL, then ye_realloc is equivalent to ye_malloc(size). If size 
+ * is 0 and ptr is not NULL, then ye_realloc is equivalent to ye_free(ptr). 
+ * 
+ * Unless ptr is NULL, it must have been returned by an earlier call to 
+ * ye_malloc(), ye_calloc() or ye_realloc(). If the area pointed to was 
+ * moved, a free(ptr) is done.
+ *
+ * If there is not enough memory to satisfy the request, ye_malloc returns
+ * NULL and sets errno to ENOMEM.
+ */
+void *ye_realloc(void *ptr, size_t size);
 
 #endif /* ALLOCATOR_H */

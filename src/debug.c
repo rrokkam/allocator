@@ -16,7 +16,6 @@ void ye_snapshot() {
     }
 }
 
-/* TODO: this is on one line for the compiler's sake.. how to fix? */
 void ye_blockprint(ye_header *block) {
     info("Block at %p: \n\
          size: %u \n\
