@@ -13,8 +13,6 @@
 
 #define HDR(payload) ((void *) payload - sizeof(ye_header))
 
-#define BLKSIZE(ptr) (((ye_header *)ptr)->size << 4)
-
 void *ye_malloc(size_t size) {
     size_t rsize = ROUND(size);
     ye_header *hdr = seg_find(rsize);

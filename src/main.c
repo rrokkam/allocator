@@ -9,11 +9,14 @@
 /*
  * TODO:
  *
- * - Replace the old criterion tests
- * - Clean up some spots with messy formatting / too much macro usage.
- * - Coalescing properly, in both directions
+ * - New helper functions:
+ *     - on malloc: seg_find needs to split if possible, coalesce forwards and mark as allocated
+ *     - on free: set allocated to 0 and try to coalesce on both sides
+ *     - on realloc lazy upsize: try to coalesce forwards
+ *     - on realloc downsize: try to split and coalesce forwards
+ *     - 
+ * - Update the old criterion tests
  * - Document the new stuff
- * - Redo the headers -- this is big!
  * - extra: magic numbers to check for corruption
  * 
  * Already done
@@ -22,6 +25,9 @@
  * - add calloc
  * - Set actual errno instead of ye_errno
  * - Rewrite debug functions to print out state of lists
+ * - Clean up some spots with messy formatting / too much macro usage.
+ * - Coalescing properly, in both directions
+ * - Redo the headers -- this is big!
  *
  */
 int main(int argc, char *argv[]) {

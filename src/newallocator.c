@@ -14,8 +14,8 @@
 /* Evaluate to 1 if allocated, and 0 if free */
 #define ALLOCATED(hdr) (((ye_header *) hdr)->alloc)
 
-/* */
-#define BLOCKSIZE(ptr) (((ye_header *)ptr)->size << 4)
+/* Get the size of a block from the header */
+#define BLOCKSIZE(hdr) (((ye_header *)hdr)->size << 4)
 
 void *ye_malloc(size_t size) {
     size_t rsize = ROUND(size);
