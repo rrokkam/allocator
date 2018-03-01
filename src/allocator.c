@@ -57,7 +57,7 @@ void *ye_realloc(void *ptr, size_t size) {
     if (bsize < rsize) { // upsizing
         ye_header *nexthdr = nextblock(hdr);
         if (bsize + BLOCKSIZE(nexthdr) >= rsize) {
-            try_coalesce_forwards(hdr, nexthdr);  // TODO: check this usage
+            try_coalesce_forwards(hdr);
         } else { // need to move to another location
             void *newptr = ye_malloc(rsize); // get a well-fitting block of memory
             if (newptr == NULL) {

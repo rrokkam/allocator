@@ -73,9 +73,7 @@ static void *add_page() {
     if (hdr == (void *) -1) {
         return NULL; // errno set to ENOMEM by ye_sbrk
     }
-    ye_header *ftr = FOOTER(hdr);
-    hdr->size = ftr->size = PAGE_SIZE >> 4;
-    hdr->alloc = ftr->alloc = 0;
+    prepare(hdr, PAGE_SIZE >> 4, 0);
     try_coalesce_backwards(hdr);
     seg_add(hdr);
     return hdr;
@@ -103,7 +101,8 @@ ye_header *seg_find(size_t size) {
         if (hdr != NULL && !ALLOCATED(hdr)) { // handles before getheapstart
             seg_rm(hdr); // extra inserts and removes are a little silly
                                     // but are needed for coalesce to work properly.
-            try_coalesce_forwards(hdr, pghdr);
+            //try_coalesce_forwards(hdr, pghdr); // TODO: should be backwards from pghdr
+            try_coalesce_backwards(pghdr);
             seg_add(hdr);
             newhdr = hdr;
         } else {
