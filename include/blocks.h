@@ -45,7 +45,7 @@ void try_coalesce_bidir(ye_header *hdr);
 
 void try_coalesce_forwards(ye_header *hdr);
 
-void try_coalesce_backwards(ye_header *hdr); // hdr is free but NOT in the free list.
+ye_header *try_coalesce_backwards(ye_header *hdr); // hdr is free but NOT in the free list.
 
 void try_split_coalesce_forwards(ye_header *hdr, size_t rsize);
 

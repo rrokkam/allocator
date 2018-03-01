@@ -73,14 +73,10 @@ static void *add_page() {
     if (hdr == (void *) -1) {
         return NULL; // errno set to ENOMEM by ye_sbrk
     }
-    prepare(hdr, PAGE_SIZE >> 4, 0);
-    try_coalesce_backwards(hdr);
-    seg_add(hdr);
+    prepare(hdr, PAGE_SIZE, 0);
     return hdr;
 }
 
-// TODO: seg_find with calling ye_sbrk properly.
-// Also need to split and coalesce here
 ye_header *seg_find(size_t size) {
     ye_header *hdr, *pghdr, *newhdr;
     for (int i = seg_index(size); i < NUM_LISTS; i++) {
@@ -97,20 +93,10 @@ ye_header *seg_find(size_t size) {
             errno = ENOMEM;
             return NULL;
         }
-        hdr = prevblock(pghdr); // try_coalesce_down
-        if (hdr != NULL && !ALLOCATED(hdr)) { // handles before getheapstart
-            seg_rm(hdr); // extra inserts and removes are a little silly
-                                    // but are needed for coalesce to work properly.
-            //try_coalesce_forwards(hdr, pghdr); // TODO: should be backwards from pghdr
-            try_coalesce_backwards(pghdr);
-            seg_add(hdr);
-            newhdr = hdr;
-        } else {
-            seg_add(pghdr);
-            newhdr = pghdr;
-        }
-    } while (BLOCKSIZE(newhdr) < size); // don't need to check the rest, this is biggest
+
+        newhdr = try_coalesce_backwards(pghdr);
+    } while (BLOCKSIZE(newhdr) < size);
     seg_rm(newhdr);
-    // TODO: try_split_coalesce_forwards? (note --  it takes rounded size - already rounded by malloc)
+    try_split_coalesce_forwards(newhdr, size); // Already rounded by ye_malloc.
     return newhdr;
 }

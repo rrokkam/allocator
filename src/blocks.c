@@ -66,14 +66,17 @@ void try_coalesce_forwards(ye_header *hdr) {
 }
 
 // hdr cannot be in the free list
-void try_coalesce_backwards(ye_header *hdr) {
+// use this for the wilderness block
+ye_header *try_coalesce_backwards(ye_header *hdr) {
     ye_header *prevhdr = prevblock(hdr);
     if (prevhdr != NULL && !ALLOCATED(prevhdr)) {
         seg_rm(prevhdr);
         coalesce(prevhdr, hdr);
-        seg_add(prevhdr); 
+        seg_add(prevhdr);
+        return prevhdr;
     } else {
         seg_add(hdr);
+        return hdr;
     }
 }
 
