@@ -30,9 +30,14 @@
 #define error(S, ...) debug_print(RED "ERROR", S, ##__VA_ARGS__)
 
 /*
+ * Outputs the state of the heap to stderr.
+ */
+void ye_snapshotall();
+
+/*
  * Outputs the state of the free lists to stderr.
  */
-void ye_snapshot();
+void ye_snapshotfree();
 
 /*
  * Outputs the state of a block to stderr, given a pointer to the header
@@ -46,7 +51,7 @@ void ye_blockprint(ye_header *hdr);
  * of the block. Calling this with a corrupted block may cause this
  * function to segfault.
  * 
- * This is equivalent to ye_blockprint(payload - sizeof(ye_header)).
+ * This is equivalent to ye_blockprint(payload - HEADER_SIZE).
  */
 void ye_varprint(void *payload);
 

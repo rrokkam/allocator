@@ -7,14 +7,14 @@
 
 // TODO: Find a better name for this function
 void prepare(ye_header *hdr, size_t rsize, bool alloc) {
-    ye_header *ftr = FOOTER(hdr);
+    ye_header *ftr = (void *) hdr + rsize;
     hdr->size = ftr->size = rsize >> 4;
     hdr->alloc = ftr->alloc = alloc;
 }
 
 ye_header *nextblock(ye_header *hdr) {
     ye_header *nexthdr = hdr + BLOCKSIZE(hdr);
-    if ((void *) ++nexthdr > heap_max()) {
+    if (PAYLOAD(nexthdr) > heap_max()) {
         return NULL;  // in the wilderness block (or corruption occurred)
     }
     return nexthdr;

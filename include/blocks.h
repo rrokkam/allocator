@@ -9,23 +9,36 @@
 #define UNUSED 3
 #define ALLOCATED_BIT 1
 
+#define HEADER_SIZE 8  // doesn't include pointers!!
+
 #define MIN_PAYLOAD_SIZE 16  // blocks need to be double word aligned.
-#define MIN_BLOCK_SIZE (2 * sizeof(ye_header) + MIN_PAYLOAD_SIZE)
+#define MIN_BLOCK_SIZE (2 * HEADER_SIZE + MIN_PAYLOAD_SIZE)
 #define MAX_BLOCK_SIZE ((uint16_t) -1) 
 
 
 // TODO: choose less confusing names
 /* Get the header of a block from a payload pointer */
-#define HEADER(payload) ((void *) payload - sizeof(ye_header))
+#define HEADER(payload) ((void *) payload - HEADER_SIZE)
+
+#define PAYLOAD(hdr) ((void *) hdr + 8)
 
 /* Get the footer of a block from the header. */
-#define FOOTER(hdr) ((void *)hdr + BLOCKSIZE(hdr) - sizeof(ye_header))
+#define FOOTER(hdr) ((void *) hdr + BLOCKSIZE(hdr) - HEADER_SIZE)
+
+/* */
+#define PREVFOOTER(hdr) ((void *) hdr - 8)
+
+/* */
+#define PREVHEADER(hdr) (PREVFOOTER(hdr) - BLOCKSIZE(PREVFOOTER(hdr)) + HEADER_SIZE)
 
 /* Evaluate to 1 if allocated, and 0 if free */
 #define ALLOCATED(hdr) (((ye_header *) hdr)->alloc)
 
 /* Get the size of a block from the header */
 #define BLOCKSIZE(hdr) (((ye_header *)hdr)->size << 4)
+
+/* Round size up to the nearest multiple of 8 */
+#define ROUND(size) (((size_t) size & ~0x07) + 8 * (((size_t) size & 0x07) != 0))
 
 typedef struct ye_header {
     uint64_t  alloc : ALLOCATED_BIT;

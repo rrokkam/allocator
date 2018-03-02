@@ -6,19 +6,24 @@
 #include "blocks.h"
 #include "segfreelist.h"
 
-/* Round size up to the nearest multiple of 8 */
-#define ROUND(size) (((size_t) size & ~0x07) + 8 * (((size_t) size & 0x07) != 0))
+static size_t reqsize(size_t size) {
+    if (size < MIN_BLOCK_SIZE) {
+        return MIN_BLOCK_SIZE;
+    } else {
+        return ROUND(size);
+    }
+}
 
 void *ye_malloc(size_t size) {
     if (size == 0) {
         return NULL;
-    }
-    size_t rsize = ROUND(size);
+    } 
+    size_t rsize = reqsize(size);
     ye_header *hdr = seg_find(rsize);
     if (hdr == NULL) {
         return NULL;
     }
-    return hdr++;  // points right after the header (to the payload)
+    return PAYLOAD(hdr);  // points right after the header (to the payload)
 }
 
 void ye_free(void *ptr) {
@@ -53,7 +58,7 @@ void *ye_realloc(void *ptr, size_t size) {
     }
     ye_header *hdr = HEADER(ptr);
     size_t bsize = BLOCKSIZE(hdr);
-    size_t rsize = ROUND(size);
+    size_t rsize = reqsize(size);
     if (bsize < rsize) { // upsizing
         ye_header *nexthdr = nextblock(hdr);
         if (bsize + BLOCKSIZE(nexthdr) >= rsize) {

@@ -24,8 +24,9 @@ void seg_init() {
     seglist[NUM_LISTS - 1].max = -1;
 }
 
+// TODO: how to test static functions?
 /* Don't give this a size lower than the minimum!! */
-int seg_index(size_t rsize) {
+/*static */int seg_index(size_t rsize) {
     if (rsize < seglist[NUM_SMALL_LISTS].min) {
         return (rsize >> 3) - 2;
     } else if (rsize > seglist[NUM_LISTS - 1].min) {
@@ -52,6 +53,10 @@ void seg_add(ye_header *hdr) {
     if (old_head != NULL) {
         old_head->prev = hdr;  
     }
+    // TODO: put prepare() here
+    hdr->alloc = 0;
+    ye_header *ftr = FOOTER(hdr);
+    ftr->alloc = 0;
 }
 
 void seg_rm(ye_header *hdr) {
@@ -66,9 +71,13 @@ void seg_rm(ye_header *hdr) {
     if (nexthdr != NULL) {
         nexthdr->prev = prevhdr;
     }
+    // TODO: put prepare() here
+    hdr->alloc = 1;
+    ye_header *ftr = FOOTER(hdr);
+    ftr->alloc = 1;
 }
 
-static void *add_page() {
+void *add_page() {
     ye_header *hdr = ye_sbrk(PAGE_SIZE);
     if (hdr == (void *) -1) {
         return NULL; // errno set to ENOMEM by ye_sbrk
@@ -77,8 +86,8 @@ static void *add_page() {
     return hdr;
 }
 
-ye_header *seg_find(size_t size) {
-    ye_header *hdr, *pghdr, *newhdr;
+static ye_header *seg_find_current(size_t size) {
+    ye_header *hdr;
     for (int i = seg_index(size); i < NUM_LISTS; i++) {
         hdr = seglist[i].head;
         for (hdr = seglist[i].head; hdr != NULL; hdr = hdr->next) {
@@ -87,16 +96,22 @@ ye_header *seg_find(size_t size) {
             }
         }
     }
+    return NULL;
+}
 
-    do { // Didn't find a block of sufficient size, time to ye_sbrk a page at a time.
-        if ((pghdr = add_page()) == NULL) {
-            errno = ENOMEM;
-            return NULL;
-        }
-
-        newhdr = try_coalesce_backwards(pghdr);
-    } while (BLOCKSIZE(newhdr) < size);
-    seg_rm(newhdr);
-    try_split_coalesce_forwards(newhdr, size); // Already rounded by ye_malloc.
-    return newhdr;
+ye_header *seg_find(size_t size) {
+    ye_header *hdr, *pghdr;
+    hdr = seg_find_current(size);
+    if (hdr == NULL) {
+        do { // Didn't find a block of sufficient size, time to ye_sbrk a page at a time.
+            if ((pghdr = add_page()) == NULL) {
+                errno = ENOMEM;
+                return NULL;
+            }
+            hdr = try_coalesce_backwards(pghdr);
+        } while (BLOCKSIZE(hdr) < size);
+    }
+    seg_rm(hdr);
+    try_split_coalesce_forwards(hdr, size); // Already rounded by ye_malloc.
+    return hdr;
 }

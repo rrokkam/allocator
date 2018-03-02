@@ -1,5 +1,8 @@
+#include <errno.h>
 #include <stdlib.h>
-
+#include "simulator.h"
+#include "debug.h"
+#include "allocator.h"
 /*
  * TODO:
  *
@@ -31,7 +34,28 @@
  *
  */
 int main(int argc, char *argv[]) {
-    exit(EXIT_SUCCESS); // placeholder for compilation
+    setup();
+    ye_header *first = (ye_header *) heap_min();
+    ye_blockprint(first);
+
+    ye_snapshotall();
+    errno = 0;
+    int *x = ye_malloc(sizeof(int));
+
+    if (x == NULL) {
+        error("x is null");
+    }
+
+    *x = 4;
+
+    ye_header *header = (ye_header *)((char*) x - 8);
+
+    /* There should be one block of size 4064 in list 3 */
+    freelist *fl = &seglist[seg_index(PAGE_SIZE - (header->size << 4))];
+    (void) fl;
+    teardown();
+
+//    exit(EXIT_SUCCESS); // placeholder for compilation
     // setup();
     // void *x = ye_malloc(sizeof(double) * 8);
     // // ye_varprint(x);

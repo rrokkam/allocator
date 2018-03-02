@@ -1,16 +1,10 @@
-COMPILE := gcc -std=gnu11
-EXEC := yemalloc
-CFLAGS := -Wall -Werror
-DFLAGS := -g -DDEBUG
-TFLAGS := -lcriterion
-
+CC := gcc
+SRCD := src
+TSTD := tests
 BLDD := build
 BIND := bin
 INCD := include
-SRCD := src
-TSTD := tests
-
-TST_EXEC = $(EXEC)_tests
+LIBD := lib
 
 SRCF := $(shell find $(SRCD) -type f -name *.c)
 TSTF := $(shell find $(TSTD) -type f -name *.c)
@@ -20,13 +14,20 @@ TST_OBJF := $(patsubst $(TSTD)/%,$(BLDD)/%,$(TSTF:.c=.o))
 
 ALL_OBJF := $(SRC_OBJF) $(TST_OBJF)
 
-.PHONY: all clean debug setup
-.DEFAULT: all clean
+INC := -I$(INCD)
 
-all: setup $(EXEC) $(TST_EXEC)
+CFLAGS := -Wall -Werror
+DFLAGS := -g -DDEBUG -DCOLOR
 
-clean:
-	rm -rf $(BIND) $(BLDD)
+STD := -std=gnu11
+TEST_LIB := -lcriterion
+
+EXEC := yemm
+EXEC_TEST := $(EXEC)_tests
+
+.PHONY: clean all setup format
+
+all: setup $(EXEC) $(EXEC_TEST)
 
 debug: CFLAGS += $(DFLAGS)
 debug: all
@@ -35,13 +36,16 @@ setup:
 	mkdir -p bin build
 
 $(EXEC): $(SRC_OBJF)
-	$(COMPILE) $(CFLAGS) -I$(INCD) $^ -o $(BIND)/$@ 
+	$(CC) $(CFLAGS) $(STD) $(INC) $^ -o $(BIND)/$@
 
-$(TST_EXEC): $(filter-out build/main.o, $(ALL_OBJF))
-	$(COMPILE) $(CFLAGS) -I$(INCD) $(TST_OBJF) $(TST_SRCF) -o $(BIND)/$(TST_EXEC) $(TFLAGS)
+$(EXEC_TEST): $(filter-out build/main.o, $(ALL_OBJF))
+	$(CC) $(CFLAGS) $(STD) $(INC) $^ -o $(BIND)/$@ $(TEST_LIB)
 
 $(BLDD)/%.o: $(SRCD)/%.c
-	$(COMPILE) $(CFLAGS) -I$(INCD) -c $< -o $@
+	$(CC) $(CFLAGS) $(STD) $(INC) -c $< -o $@
 
 $(BLDD)/%.o: $(TSTD)/%.c
-	$(COMPILE) $(CFLAGS) -I$(INCD) -c $< -o $@
+	$(CC) $(CFLAGS) $(STD) $(INC) -c $< -o $@
+
+clean:
+	rm -rf $(BIND) $(BLDD)

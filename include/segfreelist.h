@@ -15,10 +15,14 @@ typedef struct {
 
 void seg_init();
 
+int seg_index(size_t rsize);
+
 void seg_add(ye_header *hdr);
 
 void seg_rm(ye_header *hdr);
 
 ye_header *seg_find(size_t rsize);
+
+void *add_page();
 
 #endif /* SEGLIST_H */
