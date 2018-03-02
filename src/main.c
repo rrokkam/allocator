@@ -35,35 +35,8 @@
  */
 int main(int argc, char *argv[]) {
     setup();
-    ye_header *first = (ye_header *) heap_min();
-    ye_blockprint(first);
-
-    ye_snapshotall();
     errno = 0;
-    int *x = ye_malloc(sizeof(int));
-
-    if (x == NULL) {
-        error("x is null");
-    }
-
-    *x = 4;
-
-    ye_header *header = (ye_header *)((char*) x - 8);
-
-    /* There should be one block of size 4064 in list 3 */
-    freelist *fl = &seglist[seg_index(PAGE_SIZE - (header->size << 4))];
-    (void) fl;
+    void *x = ye_malloc(PAGE_SIZE * NUM_PAGES + 1);
+    (void) x;
     teardown();
-
-//    exit(EXIT_SUCCESS); // placeholder for compilation
-    // setup();
-    // void *x = ye_malloc(sizeof(double) * 8);
-    // // ye_varprint(x);
-    // // ye_snapshot();
-    // void *z = ye_realloc(x, sizeof(int));
-    // // ye_varprint(y);
-    // // ye_snapshot();
-    // (void) z;
-    // teardown();
-    // return 2; // for testing..
 }

@@ -103,6 +103,10 @@ ye_header *seg_find(size_t size) {
     ye_header *hdr, *pghdr;
     hdr = seg_find_current(size);
     if (hdr == NULL) {
+        if (size > heap_max() - heap_min()) {  // avoid sbrking the entire heap on a bad request.
+            errno = ENOMEM;
+            return NULL;
+        }
         do { // Didn't find a block of sufficient size, time to ye_sbrk a page at a time.
             if ((pghdr = add_page()) == NULL) {
                 errno = ENOMEM;

@@ -6,14 +6,6 @@
 #include "blocks.h"
 #include "segfreelist.h"
 
-static size_t reqsize(size_t size) {
-    if (size < MIN_BLOCK_SIZE) {
-        return MIN_BLOCK_SIZE;
-    } else {
-        return ROUND(size);
-    }
-}
-
 void *ye_malloc(size_t size) {
     if (size == 0) {
         return NULL;

@@ -48,6 +48,8 @@ typedef struct ye_header {
     struct ye_header *prev;
 } __attribute__((packed)) ye_header;
 
+size_t reqsize(size_t size);
+
 void prepare(ye_header *hdr, size_t rsize, bool alloc);
 
 ye_header *nextblock(ye_header *hdr);

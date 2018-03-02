@@ -5,9 +5,19 @@
 
 #include "simulator.h"
 
+size_t reqsize(size_t size) {
+    size_t blocksize = size + 2 * HEADER_SIZE;
+    if (blocksize < MIN_BLOCK_SIZE) {
+        return MIN_BLOCK_SIZE;
+    } else {
+        return ROUND(blocksize);
+    }
+}
+
 // TODO: Find a better name for this function
 void prepare(ye_header *hdr, size_t rsize, bool alloc) {
-    ye_header *ftr = (void *) hdr + rsize;
+    void *hdrptr = hdr;
+    ye_header *ftr = hdrptr + rsize - 8;
     hdr->size = ftr->size = rsize >> 4;
     hdr->alloc = ftr->alloc = alloc;
 }
@@ -20,7 +30,7 @@ ye_header *nextblock(ye_header *hdr) {
     return nexthdr;
 }
 
-// TODO fix this.. header takes payload pointer and return header!!
+// TODO fix this. should not be hdr--.
 ye_header *prevblock(ye_header *hdr) {
     size_t prevsize = BLOCKSIZE(hdr--); // look in the footer for block size.
     ye_header *prevhdr = (void *) hdr - prevsize; // avoid multiplying by sizeof ye_header
@@ -80,10 +90,12 @@ ye_header *try_coalesce_backwards(ye_header *hdr) {
     }
 }
 
+// reduce the size.
 // takes a rounded size. hdr is allocated.
 void try_split_coalesce_forwards(ye_header *hdr, size_t rsize) {
     if ((BLOCKSIZE(hdr) - rsize) >= MIN_BLOCK_SIZE) {
-        ye_header *newhdr = ((void *) hdr) + rsize;
+        void *hdrptr = hdr;  // can't cast on the same line.
+        ye_header *newhdr = hdrptr + rsize;
         prepare(newhdr, BLOCKSIZE(hdr) - rsize, 0);
         prepare(hdr, rsize, 1);
         try_coalesce_forwards(newhdr);
