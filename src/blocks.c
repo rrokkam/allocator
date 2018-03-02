@@ -23,21 +23,23 @@ void prepare(ye_header *hdr, size_t rsize, bool alloc) {
 }
 
 ye_header *nextblock(ye_header *hdr) {
-    ye_header *nexthdr = hdr + BLOCKSIZE(hdr);
-    if (PAYLOAD(nexthdr) > heap_max()) {
+    void *hdrptr = hdr;
+    ye_header *nexthdr = hdrptr + BLOCKSIZE(hdr);
+    if (PAYLOAD(nexthdr) > ye_sbrk(0)) {
         return NULL;  // in the wilderness block (or corruption occurred)
     }
     return nexthdr;
 }
 
-// TODO fix this. should not be hdr--.
 ye_header *prevblock(ye_header *hdr) {
-    size_t prevsize = BLOCKSIZE(hdr--); // look in the footer for block size.
-    ye_header *prevhdr = (void *) hdr - prevsize; // avoid multiplying by sizeof ye_header
-    if((void *) prevhdr < heap_min()) {
+    void *hdrptr = hdr;
+    void *prevftrptr = hdrptr - HEADER_SIZE;
+    size_t prevsize = BLOCKSIZE(prevftrptr); // look in the footer for block size.
+    void *prevhdrptr = hdrptr - prevsize; // avoid multiplying by sizeof ye_header
+    if(prevhdrptr < heap_min()) {
         return NULL;
     }
-    return prevhdr;
+    return prevhdrptr;
 }
 
 // Assumes both blocks are adjacent and not in the free list.

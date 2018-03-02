@@ -37,8 +37,8 @@
 /* Get the size of a block from the header */
 #define BLOCKSIZE(hdr) (((ye_header *)hdr)->size << 4)
 
-/* Round size up to the nearest multiple of 8 */
-#define ROUND(size) (((size_t) size & ~0x07) + 8 * (((size_t) size & 0x07) != 0))
+/* Round payload size up to the nearest multiple of 16 */
+#define ROUND(size) (((size_t) size & ~0x0F) + 16 * (((size_t) size & 0x0F) != 0))
 
 typedef struct ye_header {
     uint64_t  alloc : ALLOCATED_BIT;

@@ -26,7 +26,7 @@ void ye_snapshotfree() {
 
 void ye_blockprint(ye_header *hdr) {
     info("Block at %p: \n\
-         size: %d \n\
+         size: 0x%x \n\
          allocated: %d \n\
          next: %p \n\
          prev: %p",
