@@ -30,14 +30,9 @@
 #define error(S, ...) debug_print(RED "ERROR", S, ##__VA_ARGS__)
 
 /*
- * Outputs the state of the heap to stderr.
- */
-void ye_snapshotall();
-
-/*
  * Outputs the state of the free lists to stderr.
  */
-void ye_snapshotfree();
+void ye_snapshot();
 
 /*
  * Outputs the state of a block to stderr, given a pointer to the header

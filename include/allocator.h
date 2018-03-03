@@ -11,8 +11,6 @@
  * 
  * If size is 0, then ye_malloc returns NULL. If there is not enough memory
  * to satisfy the request, ye_malloc returns NULL and sets errno to ENOMEM.
- * 
- * TODO: guarantee alignment.
  */
 void *ye_malloc(size_t size);
 

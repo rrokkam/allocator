@@ -10,8 +10,8 @@ void *max_brk;
 
 freelist seglist[NUM_LISTS];
 
-// will automatically mmap if size is too large.
-// eight bytes padding at start for double word alignment.
+// Will automatically mmap if size is too large.
+// Eight bytes padding at start is for double word alignment.
 void setup() {
     min_brk = cur_brk = 8 + malloc(NUM_PAGES * PAGE_SIZE + 8);
     max_brk = min_brk + NUM_PAGES * PAGE_SIZE;

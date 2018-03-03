@@ -3,15 +3,7 @@
 #include "simulator.h"
 #include "segfreelist.h"
 
-void ye_snapshotall() {
-    ye_header *hdr = heap_min();
-    while (hdr != NULL && (void *) hdr < ye_sbrk(0)) {
-        ye_blockprint(hdr);
-        hdr = nextblock(hdr);
-    }
-}
-
-void ye_snapshotfree() {
+void ye_snapshot() {
     ye_header *head;
     for (int index = 0; index < NUM_LISTS; index++) {
         head = seglist[index].head;
@@ -34,5 +26,5 @@ void ye_blockprint(ye_header *hdr) {
 }
 
 void ye_varprint(void *data) {
-    ye_blockprint(data - HEADER_SIZE);
+    ye_blockprint(HEADER(data));
 }

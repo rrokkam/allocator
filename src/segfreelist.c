@@ -6,14 +6,6 @@
 #include "debug.h"
 #include "allocator.h"
 
-/* 
- * Initialize segmented free list with mins and maxes
- * from 0 to 5: linearly spaced. 16, 24, 32, 40, 48, 56.
- * after 6: logarithmically spaced. 64, 128, 256, 512, ...
- *
- * TODO: Might be worth trying to do this with a macro.. this seems like it
- * could/should be done at compile time.
- */
 void seg_init() {
     for (int i = 0; i < NUM_SMALL_LISTS; i++) {
         seglist[i] = (freelist) {NULL, (i << 3) + 16, (i << 3) + 16};
@@ -24,9 +16,7 @@ void seg_init() {
     seglist[NUM_LISTS - 1].max = -1;
 }
 
-// TODO: how to test static functions?
-/* Don't give this a size lower than the minimum!! */
-/*static */int seg_index(size_t rsize) {
+int seg_index(size_t rsize) {
     if (rsize < seglist[NUM_SMALL_LISTS].min) {
         return (rsize >> 3) - 2;
     } else if (rsize > seglist[NUM_LISTS - 1].min) {
@@ -40,8 +30,12 @@ void seg_init() {
     }
 }
 
-ye_header *seg_head(ye_header *hdr) {
-    return seglist[seg_index(BLOCKSIZE(hdr))].head;
+/*
+ * Set the allocated bit in the given header.
+ */
+static void set_alloc(ye_header *hdr, bool val) {
+    ye_header *ftr = FOOTER(hdr);
+    hdr->alloc = ftr->alloc = val;
 }
 
 void seg_add(ye_header *hdr) {
@@ -53,10 +47,7 @@ void seg_add(ye_header *hdr) {
     if (old_head != NULL) {
         old_head->prev = hdr;  
     }
-    // TODO: put prepare() here
-    hdr->alloc = 0;
-    ye_header *ftr = FOOTER(hdr);
-    ftr->alloc = 0;
+    set_alloc(hdr, 0);
 }
 
 void seg_rm(ye_header *hdr) {
@@ -71,10 +62,7 @@ void seg_rm(ye_header *hdr) {
     if (nexthdr != NULL) {
         nexthdr->prev = prevhdr;
     }
-    // TODO: put prepare() here
-    hdr->alloc = 1;
-    ye_header *ftr = FOOTER(hdr);
-    ftr->alloc = 1;
+    set_alloc(hdr, 1);
 }
 
 void *add_page() {
@@ -82,10 +70,13 @@ void *add_page() {
     if (hdr == (void *) -1) {
         return NULL; // errno set to ENOMEM by ye_sbrk
     }
-    prepare(hdr, PAGE_SIZE, 0);
+    set_block(hdr, PAGE_SIZE, 0);
     return hdr;
 }
 
+/*
+ * Look for a block in the current free lists (before calling ye_sbrk)
+ */
 static ye_header *seg_find_current(size_t size) {
     ye_header *hdr;
     for (int i = seg_index(size); i < NUM_LISTS; i++) {
@@ -103,7 +94,7 @@ ye_header *seg_find(size_t size) {
     ye_header *hdr, *pghdr;
     hdr = seg_find_current(size);
     if (hdr == NULL) {
-        if (size > heap_max() - heap_min()) {  // avoid sbrking the entire heap on a bad request.
+        if (size > heap_max() - heap_min()) {  // avoid ye_sbrking the entire heap on a too-big request.
             errno = ENOMEM;
             return NULL;
         }

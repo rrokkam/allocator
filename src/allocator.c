@@ -10,12 +10,12 @@ void *ye_malloc(size_t size) {
     if (size == 0) {
         return NULL;
     } 
-    size_t rsize = reqsize(size);
-    ye_header *hdr = seg_find(rsize);
+    size_t rsize = reqsize(size);  // round up and account for headers
+    ye_header *hdr = seg_find(rsize);  // find and allocate memory
     if (hdr == NULL) {
         return NULL;
     }
-    return PAYLOAD(hdr);  // points right after the header (to the payload)
+    return PAYLOAD(hdr);
 }
 
 void ye_free(void *ptr) {
