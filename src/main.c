@@ -25,7 +25,27 @@ int main(int argc, char *argv[]) {
     setup();
     errno = 0;
 
+    /* Insert workload here */
 
+    void *x = ye_malloc(sizeof(int) * 16);
+    void *y = ye_realloc(x, sizeof(char));
+
+//    cr_assert_not_null(y, "y is NULL!");
+//    cr_assert(x == y, "Payload addresses are different!");
+
+    ye_header *header = (ye_header*)((char*) y - 8);
+//    cr_assert(header->alloc == 1, "Allocated bit is not set!");
+//    cr_assert(header->size << 4 == 32, "Block size not what was expected!");
+
+    freelist *fl = &seglist[seg_index(PAGE_SIZE - 48)];
+
+    // There should be only one free block of size 4048 in list 9
+//    cr_assert_not_null(fl->head, "No block in expected free list!");
+//    cr_assert(fl->head->alloc == 0, "Allocated bit is set!");
+//    cr_assert(fl->head->size << 4 == 4048, "Free block size not what was expected!");
+
+    (void) header;
+    (void) fl;
 
     teardown();
 }
